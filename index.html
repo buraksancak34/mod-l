@@ -24,7 +24,7 @@
         .romantic-font { font-family: 'Dancing Script', cursive; }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.75);
+            background: rgba(255, 255, 255, 0.65);
             border: 1px solid rgba(255, 192, 203, 0.6);
             backdrop-filter: blur(15px);
             box-shadow: 0 10px 40px rgba(159, 18, 57, 0.04);
@@ -58,12 +58,11 @@
         /* Mesajlaşma Balonları */
         .chat-bubble {
             max-width: 80%;
-            padding: 12px 16px;
+            padding: 16px;
             border-radius: 20px;
             position: relative;
             margin-bottom: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            font-size: 0.9rem;
         }
         .chat-bubble.sent {
             background: #e11d48; /* Kırmızı tonu */
@@ -117,8 +116,13 @@
             position: relative;
             transition: all 0.3s ease;
         }
+        .memory-timeline-card:hover {
+            transform: scale(1.01);
+            box-shadow: 0 10px 25px rgba(225, 29, 72, 0.05);
+        }
         .memory-date-badge {
-            background: #fff1f2; color: #be123c;
+            background: #ffe4e6;
+            color: #be123c;
             padding: 6px 16px; border-radius: 20px;
             font-size: 11px; font-weight: 800;
             display: inline-block; margin-bottom: 8px;
@@ -216,6 +220,19 @@
         </div>
     </div>
 
+    <!-- Şifre Modalı -->
+    <div id="password-modal" class="fixed inset-0 bg-black/50 z-[999999] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-3xl shadow-2xl w-80 text-center animate-bounce-in">
+            <h3 class="text-xl font-black text-rose-600 mb-4">Giriş Yap</h3>
+            <p id="modal-user-name" class="text-sm text-slate-500 mb-4">Kullanıcı</p>
+            <input type="password" id="modal-password" placeholder="Şifre" class="custom-input text-center text-lg mb-4">
+            <div class="flex gap-2">
+                <button onclick="window.closeLoginModal()" class="flex-1 py-3 rounded-xl border border-rose-100 text-rose-400 font-bold text-xs">İPTAL</button>
+                <button onclick="window.submitLogin()" class="flex-1 py-3 rounded-xl bg-rose-500 text-white font-bold text-xs shadow-lg hover:bg-rose-600">GİRİŞ</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Editör Paneli -->
     <div id="admin-panel" class="fixed top-0 right-0 h-full w-80 admin-sidebar translate-x-full overflow-y-auto p-8 border-l border-rose-100">
         <div class="flex justify-between items-center mb-8">
@@ -273,9 +290,9 @@
                             <span id="mode-text">Gözlemci</span>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="window.login('Derya')" id="btn-login-derya" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">Derya</button>
+                            <button onclick="window.openLoginModal('Derya')" id="btn-login-derya" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">Derya</button>
                             <span class="text-rose-200">|</span>
-                            <button onclick="window.login('İlker')" id="btn-login-ilker" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">İlker</button>
+                            <button onclick="window.openLoginModal('İlker')" id="btn-login-ilker" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">İlker</button>
                         </div>
                         <button onclick="window.toggleAdmin()" id="manage-btn" class="hidden-mode btn-love px-8 py-2.5 text-[10px] uppercase shadow-lg ml-4">🛠️ Panel</button>
                         <button onclick="window.logout()" id="logout-btn" class="hidden-mode text-[10px] font-black uppercase text-rose-300 ml-4 cursor-pointer">Çıkış</button>
@@ -422,10 +439,10 @@
             measurementId: "G-D2WLJXGP67"
         };
 
-        const appId = 'derya-ilker-love-v5'; // Versiyonu yükselttik (Temiz sayfa)
+        const appId = 'derya-ilker-love-v3'; 
         let currentUser = null; 
         let allNotes = [], quotesPool = {}, allMemories = [], mottosPool = [], requestsIlker = [], requestsDerya = [];
-        let db, player, musicStarted = false, expertSwiper;
+        let db, player, musicStarted = false, expertSwiper, loginPendingUser = null;
 
         const expertTips = [
             "Duygusal bağın bedensel yolla pekişmesini sağlar.", "Partnerler arasında yakınlık ve samimiyeti artırır.", "Sevildiğini ve arzulandığını hissettirebilir.", "İlişkideki güven duygusunu güçlendirebilir.", "Stresi azaltarak ilişki iklimini yumuşatır.", "Çiftler arasında özel ve paylaşılan bir alan yaratır.", "Sözel olmayan bir iletişim biçimi sunar.", "İlişkideki romantizmi canlı tutabilir.", "Duygusal tatminle fiziksel tatmini birbirine bağlar.", "Partnerlerin birbirini tanımasını hızlandırır.", "Bedensel uyumun fark edilmesini sağlar.", "İlişkiye eğlence ve oyun duygusu katabilir.", "Uzun süreli ilişkilerde bağlanmayı destekler.", "Çatışma sonrası yakınlaşmayı kolaylaştırabilir.", "Kendilik algısını ve özgüveni olumlu etkileyebilir.", "Partnerler arası empatiyi artırabilir.", "İlişkinin “biz” duygusunu derinleştirir.", "Fiziksel temas yoluyla duygusal regülasyona katkı sağlar.", "Sadakat ve bağlılık algısını güçlendirebilir.", "İlişkinin canlı ve dinamik kalmasına yardımcı olur.", "Partnerler arası sınırların ve rızanın öğrenilmesini sağlar.", "Duygusal ihtiyaçların fark edilmesine aracı olabilir.", "İlişkide tatmin düzeyini etkileyen önemli faktörlerden biridir.", "Sevgi dilinin bir parçası olarak işlev görebilir.", "Paylaşım ve karşılıklılık duygusunu artırır.", "Partnerlerin birbirine karşı şefkatini besleyebilir.", "İlişki doyumunu dolaylı olarak yükseltebilir.", "Uzun vadede ilişkinin sürdürülebilirliğine katkı sunabilir.", "Bireysel arzuların ve sınırların konuşulmasını teşvik eder.", "Aşkın yalnızca zihinsel değil, bedensel bir deneyim olduğunu hatırlatır."
@@ -467,23 +484,40 @@
 
         const setupListeners = (db, user) => {
             if (!user) return;
+            // Catch errors gracefully
+            const catchErr = (e) => {
+                if(e.code === 'permission-denied') console.warn('Lütfen Firebase kurallarını güncelleyin: match /{document=**} { allow read, write: if true; }');
+            };
+
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'mottos'), (snap) => {
                 mottosPool = snap.exists() ? (snap.data().list || defaultMottos) : defaultMottos;
                 displayRandomMotto();
                 if(currentUser) renderMottosList();
-            });
-            onSnapshot(collection(db, 'artifacts', appId, 'requests_ilker'), (snap) => {
+            }, catchErr);
+
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'requests_ilker'), (snap) => {
                 requestsIlker = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); renderRequests();
-            });
-            onSnapshot(collection(db, 'artifacts', appId, 'requests_derya'), (snap) => {
+            }, catchErr);
+            
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'requests_derya'), (snap) => {
                 requestsDerya = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); renderRequests();
-            });
-            onSnapshot(query(collection(db, 'artifacts', appId, 'chat'), orderBy('createdAt', 'desc')), (snap) => { 
+            }, catchErr);
+            
+            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), orderBy('createdAt', 'desc')), (snap) => { 
                 const msgs = snap.docs.map(d => ({id:d.id, ...d.data()})); 
                 renderChat(msgs); 
-            });
-            onSnapshot(collection(db, 'artifacts', appId, 'gunluk_sozler'), (snap) => { quotesPool = {}; snap.docs.forEach(d => quotesPool[d.id] = d.data().text); displayDailyQuote(); if(currentUser==='İlker') renderQuotesList(); });
-            onSnapshot(query(collection(db, 'artifacts', appId, 'ani_kosesi'), orderBy('tarih', 'desc')), (snap) => { allMemories = snap.docs.map(d => ({id:d.id,...d.data()})); renderMemorySlider(); });
+            }, catchErr);
+            
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler'), (snap) => { 
+                quotesPool = {}; snap.docs.forEach(d => quotesPool[d.id] = d.data().text); 
+                displayDailyQuote(); 
+                if(currentUser==='İlker') renderQuotesList(); 
+            }, catchErr);
+            
+            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'ani_kosesi'), orderBy('tarih', 'desc')), (snap) => { 
+                allMemories = snap.docs.map(d => ({id:d.id,...d.data()})); 
+                renderMemorySlider(); 
+            }, catchErr);
         };
 
         // --- CORE FUNCTIONS ---
@@ -513,13 +547,11 @@
             const wrapper = document.getElementById('expert-slides');
             if (!wrapper) return;
             const today = new Date().getDate();
-            const start = today % expertTips.length;
-            const sorted = [...expertTips.slice(start), ...expertTips.slice(0, start)];
-            
-            wrapper.innerHTML = sorted.map(t => `<div class="swiper-slide info-slide">"${t}"</div>`).join('');
-            
-            if(window.exSwiper) window.exSwiper.destroy();
-            window.exSwiper = new Swiper(".expertSwiper", { direction: 'vertical', slidesPerView: 1, pagination: { clickable: true } });
+            const startIdx = today % expertTips.length;
+            const reordered = [...expertTips.slice(startIdx), ...expertTips.slice(0, startIdx)];
+            wrapper.innerHTML = reordered.map(tip => `<div class="swiper-slide info-slide">"${tip}"</div>`).join('');
+            if (window.exSwiper) window.exSwiper.destroy();
+            window.exSwiper = new Swiper(".expertSwiper", { direction: 'vertical', slidesPerView: 1, mousewheel: true, pagination: { clickable: true } });
         }
 
         function renderChat(msgs) {
@@ -608,42 +640,49 @@
         window.sendChat = async () => {
             const t = document.getElementById('note-text').value;
             if(!t) return;
-            await addDoc(collection(db, 'artifacts', appId, 'chat'), { text: t, sender: currentUser, createdAt: Date.now() });
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chat'), { text: t, sender: currentUser, createdAt: Date.now() });
             document.getElementById('note-text').value = '';
         };
-        window.deleteChat = async (id) => { if(confirm('Sil?')) await deleteDoc(doc(db, 'artifacts', appId, 'chat', id)); };
+        window.deleteChat = async (id) => { if(confirm('Sil?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat', id)); };
 
         window.sendRequest = async () => {
             const t = document.getElementById('req-input').value;
             if(!t) return;
-            // İlker ekliyorsa -> requests_ilker koleksiyonuna
             const col = currentUser === 'İlker' ? 'requests_ilker' : 'requests_derya';
-            await addDoc(collection(db, 'artifacts', appId, col), { text: t, from: currentUser, createdAt: Date.now() });
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', col), { text: t, from: currentUser, createdAt: Date.now() });
             document.getElementById('req-input').value = '';
         };
         window.deleteRequest = async (id, owner) => {
             const col = owner === 'İlker' ? 'requests_ilker' : 'requests_derya';
-            await deleteDoc(doc(db, 'artifacts', appId, col, id));
+            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', col, id));
         };
 
         window.saveMemoryFromMain = async () => {
              const file = document.getElementById('main-memory-photo').files[0];
              const text = document.getElementById('main-memory-text').value;
              const date = document.getElementById('main-memory-date').value;
+             if(!currentUser) return showToast("Giriş yapmalısınız!");
+             if(!text.trim() || !date) return showToast("Tarih ve açıklama şart!");
+
              let photoUrl = null;
-             if(file) { photoUrl = await new Promise(resolve => { const r = new FileReader(); r.onload = () => resolve(r.result); r.readAsDataURL(file); }); }
-             await addDoc(collection(db, 'artifacts', appId, 'ani_kosesi'), { kimden: currentUser, aciklama: text, tarih: date, foto_url: photoUrl, createdAt: Date.now() });
+             if(file) {
+                 if(file.size > 5 * 1024 * 1024) return showToast("Fotoğraf 5MB'dan büyük olamaz!");
+                 try { photoUrl = await new Promise(resolve => { const r = new FileReader(); r.onload = () => resolve(r.result); r.readAsDataURL(file); }); } 
+                 catch(e) { return showToast("Fotoğraf okunamadı."); }
+             }
+             await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'ani_kosesi'), { kimden: currentUser, aciklama: text, tarih: date, foto_url: photoUrl, createdAt: Date.now() });
         };
-        window.deleteMemory = async (id) => { if(confirm('Sil?')) await deleteDoc(doc(db, 'artifacts', appId, 'ani_kosesi', id)); };
+        window.deleteMemory = async (id) => { if(confirm('Sil?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ani_kosesi', id)); };
 
         window.saveDailyQuote = async () => {
              const d = document.getElementById('quote-date').value;
              const t = document.getElementById('daily-quote-text').value;
              if(!d) return;
              const key = `${d.split('-')[2]}-${d.split('-')[1]}`;
-             await setDoc(doc(db, 'artifacts', appId, 'gunluk_sozler', key), { text: t });
+             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler', key), { text: t });
+             document.getElementById('daily-quote-text').value = '';
         };
-        window.deleteDailyQuote = async (k) => await deleteDoc(doc(db, 'artifacts', appId, 'gunluk_sozler', k));
+        window.deleteDailyQuote = async (k) => await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler', k));
 
         window.addMotto = async () => {
              const t = document.getElementById('new-motto-text').value;
@@ -658,16 +697,28 @@
         };
         window.seedMottos = async () => { if(!confirm('Varsayılanlar?')) return; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'mottos'), { list: defaultMottos }); };
 
-        window.login = (name) => {
-            const pass = prompt(`Şifre:`);
-            const correctPass = name === 'Derya' ? '1881' : '1992';
-            if (pass === correctPass) {
-                currentUser = name;
-                localStorage.setItem('romantik_user', name);
+        window.openLoginModal = (name) => {
+            loginPendingUser = name;
+            document.getElementById('modal-user-name').innerText = name + " Girişi";
+            document.getElementById('modal-password').value = '';
+            document.getElementById('password-modal').classList.remove('hidden');
+        };
+        window.closeLoginModal = () => document.getElementById('password-modal').classList.add('hidden');
+        window.submitLogin = () => {
+            const pass = document.getElementById('modal-password').value;
+            const correctPass = loginPendingUser === 'Derya' ? '1881' : '1992';
+            if(pass === correctPass) {
+                currentUser = loginPendingUser;
+                localStorage.setItem('romantik_user', currentUser);
                 updateUI();
                 renderExpertTips();
-            } else showToast("Hatalı!");
+                window.closeLoginModal();
+                showToast("Hoş geldin " + currentUser);
+            } else {
+                showToast("Şifre Hatalı");
+            }
         };
+
         window.logout = () => { currentUser = null; localStorage.removeItem('romantik_user'); updateUI(); };
         window.toggleAdmin = () => document.getElementById('admin-panel').classList.toggle('translate-x-full');
         window.switchTab = (t) => {
@@ -678,10 +729,8 @@
              const now = new Date();
              const dM = Math.floor((now - marriageDate) / (86400000));
              const dT = Math.floor((now - meetingDate) / (86400000));
-             const elM = document.getElementById('marriage-counter');
-             const elT = document.getElementById('meeting-counter');
-             if(elM) elM.innerText = dM;
-             if(elT) elT.innerText = dT;
+             document.getElementById('marriage-counter').innerText = dM;
+             document.getElementById('meeting-counter').innerText = dT;
         }
 
         // YouTube
