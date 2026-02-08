@@ -106,10 +106,21 @@
 
         <!-- 365 Gün Yönetimi -->
         <div id="sidebar-quotes-content" class="hidden space-y-4">
-            <h3 class="text-rose-600 text-[10px] font-black uppercase">365 Günlük Mesaj Havuzu</h3>
-            <p class="text-[9px] text-rose-400 italic">Her satıra bir cümle yaz. Sırayla her gün bir tanesi görünecek.</p>
-            <textarea id="quotes-bulk" placeholder="Sözleri buraya alt alta girin..." class="custom-input h-64 text-xs"></textarea>
-            <button onclick="window.saveQuotes()" class="w-full py-4 btn-love text-sm">LİSTEYİ GÜNCELLE</button>
+            <h3 class="text-rose-600 text-[10px] font-black uppercase">Güne Özel Mesaj</h3>
+            <div class="space-y-2">
+                <label class="text-[10px] font-bold text-rose-400">TARİH SEÇ</label>
+                <input type="date" id="quote-date" class="custom-input">
+            </div>
+            <div class="space-y-2">
+                <label class="text-[10px] font-bold text-rose-400">MESAJINIZ</label>
+                <textarea id="daily-quote-text" placeholder="Bu tarihte ne yazsın?..." class="custom-input h-32"></textarea>
+            </div>
+            <button onclick="window.saveDailyQuote()" class="w-full py-4 btn-love text-sm">KAYDET</button>
+            
+            <div class="pt-6 mt-6 border-t border-rose-100">
+                <h4 class="text-[10px] font-black text-rose-400 uppercase mb-3">Planlanmış Günler</h4>
+                <div id="saved-quotes-list" class="space-y-2 max-h-48 overflow-y-auto pr-2"></div>
+            </div>
         </div>
     </div>
 
@@ -136,9 +147,9 @@
 
                     <!-- Günlük Mesaj Alanı -->
                     <div id="daily-quote-area" class="max-w-2xl w-full glass-card p-10 rounded-[3rem] border-rose-200">
-                        <div id="quote-display-box" class="text-center">
+                        <div id="quote-display-box" class="text-center w-full">
                             <h4 class="text-[9px] font-black text-rose-300 uppercase tracking-[4px] mb-4">Günün Kalp Atışı</h4>
-                            <p id="current-quote" class="text-rose-800 text-xl md:text-2xl font-bold italic leading-relaxed">Görmek için giriş yapmalısın sevgilim...</p>
+                            <p id="current-quote" class="text-rose-800 text-xl md:text-2xl font-bold italic leading-relaxed">Giriş yapıldığında yüklenecek...</p>
                             <div class="h-1 w-20 bg-rose-200 mx-auto mt-6 rounded-full"></div>
                         </div>
                     </div>
@@ -156,9 +167,9 @@
 
                 <div class="glass-card p-8 rounded-[2.5rem] border-rose-50 text-center">
                     <div class="grid grid-cols-1 gap-2">
-                        <p class="text-[9px] text-rose-300 font-black uppercase tracking-widest">Tanışma: 10 Aralık 2011</p>
+                        <p class="text-[10px] text-rose-300 font-black uppercase tracking-widest">Tanışma: 10 Aralık 2011</p>
                         <p id="meeting-counter" class="text-3xl font-black text-rose-400">0</p>
-                        <p class="text-[9px] text-rose-300 font-black uppercase">Gündür Beraberiz</p>
+                        <p class="text-[10px] text-rose-300 font-black uppercase">Gündür Beraberiz</p>
                     </div>
                 </div>
             </div>
@@ -195,9 +206,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Firebase Config
+        // *** GÜNCEL FIREBASE AYARLARI (Lütfen kontrol edin) ***
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyCbIuOJeKNpJToMg2-PsblLtue-mzElUQY",
             authDomain: "tezz-95f0d.firebaseapp.com",
@@ -208,10 +219,10 @@
             measurementId: "G-D2WLJXGP67"
         };
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'derya-ilker-private-v2';
+        const appId = 'derya-ilker-secret-v2';
         let currentUser = null; 
-        let allNotes = [], quotesPool = [];
-        let db;
+        let allNotes = [];
+        let dailyQuotes = {};
 
         const meetingDate = new Date('2011-12-10');
         const marriageDate = new Date('2019-10-27');
@@ -227,73 +238,95 @@
         const startApp = async () => {
             try {
                 const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
+                const db = getFirestore(app);
                 const auth = getAuth(app);
                 
-                // Kalıcılık ayarı
                 await setPersistence(auth, browserLocalPersistence);
                 
-                // Anonim giriş
-                await signInAnonymously(auth);
+                // Hata önleyici: Eğer özel token varsa onu kullan, yoksa anonim
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } catch(e) { await signInAnonymously(auth); }
+                } else {
+                    await signInAnonymously(auth);
+                }
 
-                onAuthStateChanged(auth, (user) => {
+                onAuthStateChanged(auth, async (user) => {
                     if (user) {
-                        checkLocalAuth(); // Yerel oturum kontrolü
-                        setupListeners(db);
+                        await checkLocalAuth(user.uid, db);
+                        setupListeners(db, user);
                     }
                 });
             } catch (e) {
-                console.error("Firebase Başlatma Hatası:", e);
-                // Hata olsa bile arayüzü göster
-                updateUI();
+                console.warn("Firebase bağlantı hatası:", e);
+                // Hata durumunda bile temel arayüzü göster
+                updateCounters();
             }
 
             setInterval(updateCounters, 1000 * 60 * 5);
             updateCounters();
         };
 
-        const setupListeners = (db) => {
-            // Notlar
+        const setupListeners = (db, user) => {
+            if (!user) return;
+
+            // Hata yakalayıcı eklenmiş dinleyiciler
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), 
                 (snap) => {
                     allNotes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderNotes();
-                }, 
-                (err) => console.warn("Not hatası:", err)
+                },
+                (err) => { 
+                    console.warn("Not erişim hatası - Rules kontrol edin:", err.message); 
+                    // İzin hatası olursa boş liste göster
+                    allNotes = [];
+                    renderNotes();
+                }
             );
 
-            // 365 Gün Sözleri
-            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'quotes'), 
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler'), 
                 (snap) => {
-                    if(snap.exists()) {
-                        quotesPool = snap.data().list || [];
-                        const area = document.getElementById('quotes-bulk');
-                        if(area) area.value = quotesPool.join('\n');
-                    } else {
-                        quotesPool = ["Hoş geldin seni çok seviyorum"];
-                    }
+                    dailyQuotes = {};
+                    snap.docs.forEach(doc => {
+                        dailyQuotes[doc.id] = doc.data().text;
+                    });
                     displayDailyMessage();
+                    if(currentUser === 'İlker') renderQuotesList();
                 },
-                (err) => console.warn("Söz hatası:", err)
+                (err) => {
+                     console.warn("Sözler erişim hatası:", err.message);
+                }
             );
         };
 
-        // Yerel oturum kontrolü (Veritabanı yazma zorunluluğunu kaldırır)
-        function checkLocalAuth() {
-            const savedUser = localStorage.getItem('romantik_portal_user');
-            if (savedUser) {
-                currentUser = savedUser;
+        async function checkLocalAuth(userId, db) {
+            try {
+                const snap = await getDoc(doc(db, 'artifacts', appId, 'users', userId, 'profile', 'status'));
+                if (snap.exists()) {
+                    currentUser = snap.data().name;
+                }
+                updateUI();
+            } catch (e) { 
+                currentUser = null; 
+                updateUI(); 
             }
-            updateUI();
         }
 
-        window.login = (name) => {
+        window.login = async (name) => {
+            const auth = getAuth();
+            const db = getFirestore();
+            if (!auth.currentUser) return showToast("Bağlantı bekleniyor...");
+            
             const pass = prompt(`${name} için şifre girin:`);
             const correctPass = name === 'Derya' ? '1881' : '1992';
 
             if (pass === correctPass) {
                 currentUser = name;
-                localStorage.setItem('romantik_portal_user', name); // Oturumu tarayıcıda sakla
+                await setDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'profile', 'status'), { 
+                    name: name, 
+                    lastLogin: Date.now() 
+                });
                 showToast(`Hoş geldin ${name}!`);
                 updateUI();
             } else {
@@ -301,9 +334,13 @@
             }
         };
 
-        window.logout = () => {
+        window.logout = async () => {
+            const db = getFirestore();
+            const auth = getAuth();
             currentUser = null;
-            localStorage.removeItem('romantik_portal_user');
+            if(auth.currentUser) {
+                await setDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'profile', 'status'), { name: null });
+            }
             updateUI();
         };
 
@@ -317,15 +354,23 @@
             }
 
             const now = new Date();
-            const start = new Date(now.getFullYear(), 0, 0);
-            const diff = now - start;
-            const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const dayStr = String(now.getDate()).padStart(2, '0');
+            const monthStr = String(now.getMonth() + 1).padStart(2, '0');
+            const key = `${dayStr}-${monthStr}`;
 
-            if (quotesPool.length > 0) {
-                const idx = dayOfYear % quotesPool.length;
-                quoteEl.innerText = `"${quotesPool[idx]}"`;
-                quoteEl.className = "text-rose-800 text-xl md:text-2xl font-bold italic leading-relaxed quote-active-text";
+            // 8 Şubat Özel Mesajı + Dinamik Mesajlar
+            let message = "Seni çok seviyorum"; 
+            
+            if (key === '08-02') {
+                message = "Seni çok seviyorum";
+            } else if (dailyQuotes[key]) {
+                message = dailyQuotes[key];
+            } else {
+                message = `Bugün ${dayStr}.${monthStr} ve seni hala ilk günkü gibi seviyorum.`;
             }
+            
+            quoteEl.innerText = `"${message}"`;
+            quoteEl.className = "text-rose-800 text-xl md:text-3xl font-bold italic leading-relaxed quote-active-text font-serif";
         }
 
         function updateUI() {
@@ -334,6 +379,7 @@
             const logoutBtn = document.getElementById('logout-btn');
             const noteTitle = document.getElementById('notes-title');
             const noteLabel = document.getElementById('note-target-label');
+            const tabQuotes = document.getElementById('tab-quotes');
 
             if (currentUser) {
                 if(modeText) modeText.innerText = currentUser;
@@ -342,9 +388,11 @@
                 if (currentUser === 'İlker') {
                     if(manageBtn) manageBtn.classList.remove('hidden-mode');
                     if(noteLabel) noteLabel.innerText = "Derya İçin Not Bırak";
+                    if(tabQuotes) tabQuotes.classList.remove('hidden-mode');
                 } else {
                     if(manageBtn) manageBtn.classList.add('hidden-mode');
                     if(noteLabel) noteLabel.innerText = "İlker İçin Not Bırak";
+                    if(tabQuotes) tabQuotes.classList.add('hidden-mode');
                 }
                 
                 if (noteTitle) noteTitle.innerText = currentUser === 'İlker' ? "📍 Derya'dan Mesajlar" : "📍 İlker'den Mesajlar";
@@ -356,6 +404,7 @@
             }
             renderNotes();
             displayDailyMessage();
+            if(currentUser === 'İlker') renderQuotesList();
         }
 
         function renderNotes() {
@@ -363,7 +412,7 @@
             if(!body) return;
 
             if (!currentUser) {
-                body.innerHTML = '<tr><td colspan="4" class="p-24 text-center text-rose-300 italic font-bold">İçerik sadece Derya ve İlker içindir.</td></tr>';
+                body.innerHTML = '<tr><td colspan="4" class="p-24 text-center text-rose-200 italic font-bold">Notları sadece siz görebilirsiniz. Lütfen giriş yapın...</td></tr>';
                 return;
             }
 
@@ -387,12 +436,61 @@
             `).join('');
         }
 
+        function renderQuotesList() {
+            const list = document.getElementById('saved-quotes-list');
+            if(!list) return;
+            const keys = Object.keys(dailyQuotes).sort();
+            
+            if(keys.length === 0) {
+                list.innerHTML = '<p class="text-[10px] text-rose-300 italic p-2">Henüz özel gün eklenmemiş.</p>';
+                return;
+            }
+
+            list.innerHTML = keys.map(dateKey => `
+                <div class="p-4 bg-white border border-rose-100 rounded-2xl flex justify-between items-center group shadow-sm hover:shadow-md transition-all">
+                    <div class="flex-1">
+                        <span class="text-[10px] font-black text-rose-500 bg-rose-50 px-2 py-1 rounded-lg mr-2">${dateKey}</span>
+                        <p class="text-xs text-slate-600 italic mt-1 pr-4 line-clamp-2">"${dailyQuotes[dateKey]}"</p>
+                    </div>
+                    <button onclick="window.deleteDailyQuote('${dateKey}')" class="text-rose-300 hover:text-rose-600 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">SİL</button>
+                </div>
+            `).join('');
+        }
+
+        // --- ACTIONS ---
+        window.saveDailyQuote = async () => {
+            const dateVal = document.getElementById('quote-date').value; 
+            const text = document.getElementById('daily-quote-text').value;
+            
+            if(!dateVal || !text) return showToast("Tarih ve söz gerekli!");
+            
+            const d = new Date(dateVal);
+            const dayStr = String(d.getDate()).padStart(2, '0');
+            const monthStr = String(d.getMonth() + 1).padStart(2, '0');
+            const key = `${dayStr}-${monthStr}`;
+
+            const db = getFirestore();
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler', key), { text });
+            
+            document.getElementById('daily-quote-text').value = '';
+            showToast(`${key} tarihi kaydedildi!`);
+        };
+
+        window.deleteDailyQuote = async (key) => {
+            if(confirm('Silinsin mi?')) {
+                const db = getFirestore();
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler', key));
+                showToast("Silindi.");
+            }
+        };
+
         window.addNote = async () => {
             if(!currentUser) return;
             const textEl = document.getElementById('note-text');
             if(!textEl || !textEl.value.trim()) return;
             
             try {
+                const db = getFirestore();
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar', `n-${Date.now()}`), {
                     sender: currentUser,
                     receiver: currentUser === 'İlker' ? 'Derya' : 'İlker',
@@ -407,22 +505,10 @@
             }
         };
 
-        window.saveQuotes = async () => {
-            if(currentUser !== 'İlker') return alert("Bu ayarlar sadece İlker'in kalbinden geçer. ❤️");
-            const area = document.getElementById('quotes-bulk');
-            if(!area) return;
-            const list = area.value.split('\n').filter(s => s.trim() !== "");
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'quotes'), { list });
-                showToast("365 günlük hikayemiz güncellendi!");
-            } catch (e) {
-                showToast("Güncelleme başarısız.");
-            }
-        };
-
         window.deleteNote = async (id) => { 
             if(confirm('Bu hatırayı silmek istiyor musun?')) {
                 try {
+                    const db = getFirestore();
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar', id));
                     showToast("Not silindi.");
                 } catch (e) { showToast("Hata!"); }
