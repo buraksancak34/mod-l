@@ -195,7 +195,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         // Firebase Config
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -211,6 +211,7 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'derya-ilker-private-v2';
         let currentUser = null; 
         let allNotes = [], quotesPool = [];
+        let db;
 
         const meetingDate = new Date('2011-12-10');
         const marriageDate = new Date('2019-10-27');
@@ -226,54 +227,42 @@
         const startApp = async () => {
             try {
                 const app = initializeApp(firebaseConfig);
-                const db = getFirestore(app);
+                db = getFirestore(app);
                 const auth = getAuth(app);
                 
+                // Kalıcılık ayarı
                 await setPersistence(auth, browserLocalPersistence);
                 
-                // Kimlik doğrulama işlemi (Önce token sonra anonim)
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    // Token geçersiz olabilir, try-catch içine alıyoruz
-                    try {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } catch(tokenErr) {
-                         console.warn("Token ile giriş yapılamadı, anonim deneniyor:", tokenErr);
-                         await signInAnonymously(auth);
-                    }
-                } else {
-                    await signInAnonymously(auth);
-                }
+                // Anonim giriş
+                await signInAnonymously(auth);
 
-                onAuthStateChanged(auth, async (user) => {
+                onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        await checkLocalAuth(user.uid, db);
-                        setupListeners(db, user);
+                        checkLocalAuth(); // Yerel oturum kontrolü
+                        setupListeners(db);
                     }
                 });
             } catch (e) {
                 console.error("Firebase Başlatma Hatası:", e);
-                showToast("Bulut bağlantısı kurulamadı.");
+                // Hata olsa bile arayüzü göster
+                updateUI();
             }
 
             setInterval(updateCounters, 1000 * 60 * 5);
             updateCounters();
         };
 
-        const setupListeners = (db, user) => {
-            if (!user) return;
-
-            // Notlar - Hata yakalayıcı eklendi
+        const setupListeners = (db) => {
+            // Notlar
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), 
                 (snap) => {
                     allNotes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderNotes();
                 }, 
-                (err) => {
-                    console.warn("Not dinleyici hatası:", err.message);
-                }
+                (err) => console.warn("Not hatası:", err)
             );
 
-            // 365 Gün Sözleri - Hata yakalayıcı eklendi
+            // 365 Gün Sözleri
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'quotes'), 
                 (snap) => {
                     if(snap.exists()) {
@@ -285,39 +274,26 @@
                     }
                     displayDailyMessage();
                 },
-                (err) => {
-                    console.warn("Söz dinleyici hatası:", err.message);
-                }
+                (err) => console.warn("Söz hatası:", err)
             );
         };
 
-        async function checkLocalAuth(userId, db) {
-            try {
-                const snap = await getDoc(doc(db, 'artifacts', appId, 'users', userId, 'profile', 'status'));
-                if (snap.exists()) {
-                    currentUser = snap.data().name;
-                }
-                updateUI();
-            } catch (e) { 
-                currentUser = null; 
-                updateUI(); 
+        // Yerel oturum kontrolü (Veritabanı yazma zorunluluğunu kaldırır)
+        function checkLocalAuth() {
+            const savedUser = localStorage.getItem('romantik_portal_user');
+            if (savedUser) {
+                currentUser = savedUser;
             }
+            updateUI();
         }
 
-        window.login = async (name) => {
-            const auth = getAuth();
-            const db = getFirestore();
-            if (!auth.currentUser) return showToast("Bağlantı bekleniyor...");
-            
+        window.login = (name) => {
             const pass = prompt(`${name} için şifre girin:`);
             const correctPass = name === 'Derya' ? '1881' : '1992';
 
             if (pass === correctPass) {
                 currentUser = name;
-                await setDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'profile', 'status'), { 
-                    name: name, 
-                    lastLogin: Date.now() 
-                });
+                localStorage.setItem('romantik_portal_user', name); // Oturumu tarayıcıda sakla
                 showToast(`Hoş geldin ${name}!`);
                 updateUI();
             } else {
@@ -325,12 +301,9 @@
             }
         };
 
-        window.logout = async () => {
-            const db = getFirestore();
-            const auth = getAuth();
-            if (!auth.currentUser) return;
+        window.logout = () => {
             currentUser = null;
-            await setDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'profile', 'status'), { name: null });
+            localStorage.removeItem('romantik_portal_user');
             updateUI();
         };
 
@@ -366,7 +339,6 @@
                 if(modeText) modeText.innerText = currentUser;
                 if(logoutBtn) logoutBtn.classList.remove('hidden-mode');
                 
-                // Panel yetkisi (İlker tüm yetkilere sahip, Derya sadece not bırakabilir)
                 if (currentUser === 'İlker') {
                     if(manageBtn) manageBtn.classList.remove('hidden-mode');
                     if(noteLabel) noteLabel.innerText = "Derya İçin Not Bırak";
@@ -399,7 +371,7 @@
             const visible = allNotes.filter(n => n.sender === targetSender).sort((a,b) => b.createdAt - a.createdAt);
 
             if (visible.length === 0) {
-                body.innerHTML = '<tr><td colspan="4" class="p-24 text-center text-rose-300 italic font-bold">Henüz sana bir not gelmemiş sevgilim...</td></tr>';
+                body.innerHTML = `<tr><td colspan="4" class="p-24 text-center text-rose-300 italic font-bold">Henüz sana bir not gelmemiş sevgilim...</td></tr>`;
                 return;
             }
 
@@ -417,7 +389,6 @@
 
         window.addNote = async () => {
             if(!currentUser) return;
-            const db = getFirestore();
             const textEl = document.getElementById('note-text');
             if(!textEl || !textEl.value.trim()) return;
             
@@ -438,7 +409,6 @@
 
         window.saveQuotes = async () => {
             if(currentUser !== 'İlker') return alert("Bu ayarlar sadece İlker'in kalbinden geçer. ❤️");
-            const db = getFirestore();
             const area = document.getElementById('quotes-bulk');
             if(!area) return;
             const list = area.value.split('\n').filter(s => s.trim() !== "");
@@ -453,7 +423,7 @@
         window.deleteNote = async (id) => { 
             if(confirm('Bu hatırayı silmek istiyor musun?')) {
                 try {
-                    await deleteDoc(doc(getFirestore(), 'artifacts', appId, 'public', 'data', 'ozel_notlar', id));
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar', id));
                     showToast("Not silindi.");
                 } catch (e) { showToast("Hata!"); }
             }
