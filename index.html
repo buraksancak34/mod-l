@@ -62,6 +62,12 @@
             z-index: 1000000; opacity: 0; transition: opacity 0.3s; pointer-events: none;
         }
 
+        #error-banner {
+            display: none; position: fixed; top: 0; left: 0; width: 100%;
+            background: #9f1239; color: white; text-align: center;
+            padding: 8px; font-size: 12px; font-weight: bold; z-index: 2000;
+        }
+
         .important-note {
             color: #ef4444 !important;
             font-weight: 800 !important;
@@ -83,17 +89,30 @@
 </head>
 <body class="antialiased">
 
+    <div id="error-banner"></div>
     <div id="toast">İşlem Başarılı!</div>
 
-    <!-- Editör Paneli (Sadece İlker - 365 Gün Yönetimi) -->
+    <!-- Editör Paneli -->
     <div id="admin-panel" class="fixed top-0 right-0 h-full w-80 admin-sidebar translate-x-full overflow-y-auto p-8 border-l border-rose-100">
         <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-black text-rose-800 flex items-center gap-2">🛠️ Yönetici Paneli</h2>
+            <h2 class="text-xl font-black text-rose-800 flex items-center gap-2">🛠️ Editör Paneli</h2>
             <button onclick="window.toggleAdmin()" class="text-rose-300 hover:text-rose-600 text-3xl">&times;</button>
         </div>
 
+        <div class="flex gap-1 mb-8 bg-rose-50 p-1 rounded-2xl">
+            <button onclick="window.switchTab('notes')" id="tab-notes" class="tab-btn active flex-1 text-[10px] font-bold py-2 rounded-xl">NOT BIRAK</button>
+            <button onclick="window.switchTab('quotes')" id="tab-quotes" class="tab-btn inactive flex-1 text-[10px] font-bold py-2 rounded-xl">365 GÜN</button>
+        </div>
+        
+        <!-- Not Bırakma -->
+        <div id="sidebar-notes-content" class="space-y-4">
+            <h3 class="text-rose-600 text-[10px] font-black uppercase" id="note-target-label">Sevgiline Not Bırak</h3>
+            <textarea id="note-text" placeholder="Kalbinden geçenleri buraya dök..." class="custom-input h-32"></textarea>
+            <button onclick="window.addNote()" class="w-full py-4 btn-love text-sm">NOTU İLET</button>
+        </div>
+
         <!-- 365 Gün Yönetimi -->
-        <div id="sidebar-quotes-content" class="space-y-4">
+        <div id="sidebar-quotes-content" class="hidden space-y-4">
             <h3 class="text-rose-600 text-[10px] font-black uppercase">Güne Özel Mesaj Ekle</h3>
             <div class="space-y-2">
                 <label class="text-[10px] font-bold text-rose-400">TARİH SEÇ</label>
@@ -129,7 +148,7 @@
                             <span class="text-rose-200">|</span>
                             <button onclick="window.login('İlker')" id="btn-login-ilker" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">İlker</button>
                         </div>
-                        <button onclick="window.toggleAdmin()" id="manage-btn" class="hidden-mode btn-love px-8 py-2.5 text-[10px] uppercase shadow-lg ml-4">🛠️ 365 Gün Yönetimi</button>
+                        <button onclick="window.toggleAdmin()" id="manage-btn" class="hidden-mode btn-love px-8 py-2.5 text-[10px] uppercase shadow-lg ml-4">🛠️ Panel</button>
                         <button onclick="window.logout()" id="logout-btn" class="hidden-mode text-[10px] font-black uppercase text-rose-300 ml-4 cursor-pointer">Çıkış</button>
                     </div>
 
@@ -165,21 +184,7 @@
 
         <!-- Notlar Bölümü -->
         <section id="notes-section" class="mt-20">
-            <div class="flex justify-between items-end mb-8 px-4">
-                <h2 id="notes-title" class="text-3xl font-black text-rose-900 uppercase">📍 Özel Notlar</h2>
-            </div>
-
-            <!-- Yeni Mesaj Gönderme Alanı (Ana Sayfada) -->
-            <div id="message-input-area" class="hidden mb-12 glass-card p-8 rounded-[2rem] border-rose-200 flex flex-col md:flex-row gap-4 items-end">
-                <div class="w-full">
-                    <label class="text-[10px] font-bold text-rose-400 block mb-2 uppercase tracking-widest">Yeni Mesaj Yaz</label>
-                    <textarea id="note-text" placeholder="Kalbinden geçenleri buraya yaz..." class="custom-input h-24 text-sm"></textarea>
-                </div>
-                <button onclick="window.addNote()" class="w-full md:w-auto px-8 py-4 btn-love text-xs font-bold uppercase shadow-lg h-24 flex items-center justify-center gap-2">
-                    <span>GÖNDER</span> 💌
-                </button>
-            </div>
-
+            <h2 id="notes-title" class="text-3xl font-black text-rose-900 uppercase mb-8 px-4">📍 Özel Notlar</h2>
             <div class="glass-card rounded-[3rem] overflow-hidden border-none shadow-xl min-h-[250px]">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse min-w-[700px]">
@@ -207,10 +212,9 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Firebase Config
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyCbIuOJeKNpJToMg2-PsblLtue-mzElUQY",
             authDomain: "tezz-95f0d.firebaseapp.com",
@@ -237,6 +241,13 @@
             }
         };
 
+        const showError = (msg) => {
+            const el = document.getElementById('error-banner');
+            el.style.display = 'block';
+            el.innerText = "HATA: " + msg;
+            console.error(msg);
+        };
+
         const startApp = async () => {
             try {
                 const app = initializeApp(firebaseConfig);
@@ -245,7 +256,6 @@
                 
                 await setPersistence(auth, browserLocalPersistence);
                 
-                // Kimlik doğrulama işlemi (Önce token sonra anonim)
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     try {
                         await signInWithCustomToken(auth, __initial_auth_token);
@@ -262,7 +272,7 @@
                 });
             } catch (e) {
                 console.warn("Firebase bağlantı hatası:", e);
-                // Hata durumunda bile temel arayüzü göster
+                // Hata durumunda bile çalışması için sayaçları başlat
                 updateCounters();
             }
 
@@ -273,34 +283,32 @@
         const setupListeners = (db, user) => {
             if (!user) return;
 
-            // Notlar - Hata yakalayıcı eklenmiş dinleyiciler
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), 
-                (snap) => {
-                    allNotes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderNotes();
-                },
-                (err) => { 
-                    console.warn("Not erişim hatası - Rules kontrol edin:", err.message); 
-                    // İzin hatası olursa boş liste göster
-                    allNotes = [];
-                    renderNotes();
-                }
-            );
+            // Hata yakalayıcılı dinleyiciler
+            try {
+                onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), orderBy('createdAt', 'desc')),
+                    (snap) => {
+                        allNotes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        renderNotes();
+                    },
+                    (err) => { 
+                        showError("Veritabanı izni yok. Firebase Console'dan Rules kısmını güncelleyin: " + err.message); 
+                    }
+                );
 
-            // 365 Gün Sözleri - Hata yakalayıcı eklendi
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler'), 
-                (snap) => {
-                    dailyQuotes = {};
-                    snap.docs.forEach(doc => {
-                        dailyQuotes[doc.id] = doc.data().text;
-                    });
-                    displayDailyMessage();
-                    if(currentUser === 'İlker') renderQuotesList();
-                },
-                (err) => {
-                     console.warn("Sözler erişim hatası:", err.message);
-                }
-            );
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler'), 
+                    (snap) => {
+                        dailyQuotes = {};
+                        snap.docs.forEach(doc => {
+                            dailyQuotes[doc.id] = doc.data().text;
+                        });
+                        displayDailyMessage();
+                        if(currentUser === 'İlker') renderQuotesList();
+                    },
+                    (err) => console.warn("Söz hatası:", err.message)
+                );
+            } catch(e) {
+                showError("Bağlantı hatası: " + e.message);
+            }
         };
 
         async function checkLocalAuth(userId, db) {
@@ -361,7 +369,6 @@
             const monthStr = String(now.getMonth() + 1).padStart(2, '0');
             const key = `${dayStr}-${monthStr}`;
 
-            // 8 Şubat Özel Mesajı + Dinamik Mesajlar
             let message = "Seni çok seviyorum"; 
             
             if (key === '08-02') {
@@ -382,22 +389,20 @@
             const logoutBtn = document.getElementById('logout-btn');
             const noteTitle = document.getElementById('notes-title');
             const noteLabel = document.getElementById('note-target-label');
-            const tabQuotes = document.getElementById('sidebar-quotes-content');
-            const msgArea = document.getElementById('message-input-area');
+            const tabQuotes = document.getElementById('tab-quotes');
 
             if (currentUser) {
                 if(modeText) modeText.innerText = currentUser;
                 if(logoutBtn) logoutBtn.classList.remove('hidden-mode');
                 
-                // Mesaj gönderme alanı herkese açık (giriş yapınca)
-                if(msgArea) msgArea.classList.remove('hidden');
-
                 if (currentUser === 'İlker') {
-                    if(manageBtn) manageBtn.classList.remove('hidden-mode'); // İlker yönetimi görür
+                    if(manageBtn) manageBtn.classList.remove('hidden-mode');
                     if(noteLabel) noteLabel.innerText = "Derya İçin Not Bırak";
+                    if(tabQuotes) tabQuotes.classList.remove('hidden-mode');
                 } else {
-                    if(manageBtn) manageBtn.classList.add('hidden-mode'); // Derya yönetimi göremez
+                    if(manageBtn) manageBtn.classList.add('hidden-mode');
                     if(noteLabel) noteLabel.innerText = "İlker İçin Not Bırak";
+                    if(tabQuotes) tabQuotes.classList.add('hidden-mode');
                 }
                 
                 if (noteTitle) noteTitle.innerText = currentUser === 'İlker' ? "📍 Derya'dan Mesajlar" : "📍 İlker'den Mesajlar";
@@ -405,7 +410,6 @@
                 if(modeText) modeText.innerText = "Gözlemci";
                 if(manageBtn) manageBtn.classList.add('hidden-mode');
                 if(logoutBtn) logoutBtn.classList.add('hidden-mode');
-                if(msgArea) msgArea.classList.add('hidden');
                 if(noteTitle) noteTitle.innerText = "📍 Özel Notlar";
             }
             renderNotes();
@@ -492,11 +496,11 @@
 
         window.addNote = async () => {
             if(!currentUser) return;
-            const db = getFirestore();
             const textEl = document.getElementById('note-text');
             if(!textEl || !textEl.value.trim()) return;
             
             try {
+                const db = getFirestore();
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar', `n-${Date.now()}`), {
                     sender: currentUser,
                     receiver: currentUser === 'İlker' ? 'Derya' : 'İlker',
@@ -531,7 +535,18 @@
         }
 
         window.toggleAdmin = () => document.getElementById('admin-panel').classList.toggle('translate-x-full');
-        
+        window.switchTab = (tab) => {
+            const tNotes = document.getElementById('tab-notes');
+            const tQuotes = document.getElementById('tab-quotes');
+            const sNotes = document.getElementById('sidebar-notes-content');
+            const sQuotes = document.getElementById('sidebar-quotes-content');
+            
+            if(tNotes) tNotes.className = `tab-btn flex-1 text-[10px] font-bold py-2 rounded-xl ${tab === 'notes' ? 'active' : 'inactive'}`;
+            if(tQuotes) tQuotes.className = `tab-btn flex-1 text-[10px] font-bold py-2 rounded-xl ${tab === 'quotes' ? 'active' : 'inactive'}`;
+            if(sNotes) sNotes.className = tab === 'notes' ? 'space-y-4' : 'hidden';
+            if(sQuotes) sQuotes.className = tab === 'quotes' ? 'space-y-4' : 'hidden';
+        };
+
         startApp();
     </script>
 </body>
