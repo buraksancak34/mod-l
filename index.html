@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>İlker & Derya - Bizim Dünyamız</title>
+    <title>Derya & İlker - Bizim Dünyamız</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -29,27 +29,29 @@
         body { background: linear-gradient(135deg, #f8fafc 0%, #fff1f2 100%); min-height: 100vh; overflow-x: hidden; }
         .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 32px rgba(225, 29, 72, 0.05); border-radius: 1.5rem; }
         
-        /* Geçiş Efektleri */
-        .blur-lock { filter: blur(15px); pointer-events: none; user-select: none; transition: filter 0.5s ease; }
-        .unlocked { filter: blur(0); pointer-events: auto; transition: filter 0.5s ease; }
-        .hidden-opacity { opacity: 0; pointer-events: none; height: 0; overflow: hidden; }
-        .visible-opacity { opacity: 1; pointer-events: auto; height: auto; }
+        /* GİZLİLİK AYARLARI */
+        .blur-lock { filter: blur(15px); pointer-events: none; user-select: none; transition: filter 0.8s ease; opacity: 0.5; }
+        .unlocked { filter: blur(0); pointer-events: auto; opacity: 1; transition: filter 0.8s ease, opacity 0.8s ease; }
+        
+        .hidden-opacity { opacity: 0; pointer-events: none; height: 0; overflow: hidden; transition: opacity 0.8s ease; }
+        .visible-opacity { opacity: 1; pointer-events: auto; height: auto; transition: opacity 0.8s ease; }
 
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #fda4af; border-radius: 4px; }
         
+        /* ZARF STİLİ */
         .postal-envelope {
             background: #fff; border: 1px solid #ffe4e6; border-left: 4px solid #e11d48;
             padding: 12px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .postal-envelope:hover { transform: translateX(5px); box-shadow: 0 5px 15px rgba(225, 29, 72, 0.1); background: #fff0f3; }
+        .postal-envelope:hover { transform: translateX(5px); background: #fff0f3; }
         .postal-envelope::after { content: '💌'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; opacity: 0.5; }
         
-        /* Giden zarf rengi farklı olsun */
-        .postal-envelope.outgoing { border-left-color: #6366f1; } 
+        /* Giden zarfı farklı renklendir */
+        .postal-envelope.outgoing { border-left-color: #818cf8; background: #f5f3ff; }
+        .postal-envelope.outgoing::after { content: '📤'; opacity: 0.4; }
 
         .swiper-button-next, .swiper-button-prev { color: #e11d48 !important; background: white; width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        
         .tab-btn.active { background-color: #e11d48; color: white; }
     </style>
 </head>
@@ -69,7 +71,7 @@
                 <p class="text-rose-400 font-medium tracking-wide text-lg">14 yıldır aynı gökyüzüne bakmak... <span class="text-rose-600">♥</span></p>
             </div>
             
-            <div class="flex flex-col gap-4 w-full md:w-auto">
+            <div id="counters-wrapper" class="flex flex-col gap-4 w-full md:w-auto blur-lock relative">
                 <div class="glass-card p-4 text-center min-w-[200px] border-l-4 border-rose-400">
                     <div class="text-[10px] text-rose-400 font-black uppercase tracking-widest mb-1">Evlilik Yolculuğumuz</div>
                     <div id="counter-marriage" class="text-3xl font-black text-slate-700 leading-none">...</div>
@@ -84,18 +86,21 @@
         </header>
 
         <section class="mb-16">
-            <div class="glass-card max-w-3xl mx-auto p-12 text-center relative overflow-hidden group hover:shadow-xl transition-shadow">
+            <div class="glass-card max-w-3xl mx-auto p-12 text-center relative overflow-hidden group">
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-200 via-pink-400 to-rose-200"></div>
                 <h2 class="text-xs font-black text-rose-400 uppercase tracking-[0.4em] mb-8">GÜNÜN KALP ATIŞI</h2>
-                <p id="daily-message-display" class="font-romantic text-3xl md:text-5xl text-slate-700 leading-normal transition-all">"Giriş yapıldığında kalbimiz konuşacak..."</p>
                 
+                <div id="quote-wrapper" class="blur-lock min-h-[80px] flex items-center justify-center">
+                    <p id="daily-message-display" class="font-romantic text-3xl md:text-5xl text-slate-700 leading-normal">...</p>
+                </div>
+
                 <div class="mt-10" id="auth-container">
                     <button onclick="openLoginModal()" id="login-trigger-btn" class="bg-rose-500 text-white px-10 py-3 rounded-full text-xs font-bold uppercase shadow-lg hover:bg-rose-600 transition-all hover:scale-105">Giriş Yap</button>
                     
-                    <div id="user-info-panel" class="hidden flex flex-col items-center gap-3 animate-fade-in">
+                    <div id="user-info-panel" class="hidden flex flex-col items-center gap-3">
                         <div class="flex items-center gap-3 bg-rose-50 px-4 py-1 rounded-full border border-rose-100">
                             <span id="welcome-text" class="text-xs font-bold text-rose-600 uppercase tracking-wider"></span>
-                            <button onclick="toggleAdmin()" id="admin-btn" class="hidden text-slate-400 hover:text-rose-500 text-lg" title="Yönetim Paneli">⚙️</button>
+                            <button onclick="toggleAdmin()" id="admin-btn" class="hidden text-slate-400 hover:text-rose-500 text-lg" title="Yönetim">⚙️</button>
                         </div>
                         <button onclick="logout()" class="text-[10px] text-slate-400 underline hover:text-rose-500">Çıkış</button>
                     </div>
@@ -103,16 +108,14 @@
             </div>
         </section>
 
-        <div id="secure-layer" class="relative blur-lock">
+        <div id="secure-layer" class="hidden-opacity">
             
-            <div id="lock-overlay" class="absolute inset-0 z-30 flex flex-col items-center justify-center pt-20">
-                <div class="text-6xl mb-4 opacity-50 animate-pulse">🔒</div>
-                <p class="text-rose-900 font-bold bg-white/50 px-4 py-2 rounded-xl backdrop-blur">Özel İçerik</p>
-            </div>
-
             <div class="mb-16 relative">
-                <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-rose-100 text-center max-w-2xl mx-auto transform hover:-translate-y-1 transition-transform duration-300 relative">
-                    <button onclick="openNoteModal()" class="absolute top-4 right-4 bg-rose-50 text-rose-500 w-8 h-8 rounded-full flex items-center justify-center font-bold hover:bg-rose-100" title="Yeni Tavsiye Ekle">+</button>
+                <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-rose-100 text-center max-w-2xl mx-auto relative group">
+                    <div class="absolute top-4 right-4 flex gap-2">
+                        <button onclick="showRandomNote()" class="bg-slate-100 text-slate-500 w-8 h-8 rounded-full flex items-center justify-center font-bold hover:bg-slate-200 shadow-sm" title="Rastgele Getir">🎲</button>
+                        <button onclick="openNoteModal()" class="bg-rose-50 text-rose-500 w-8 h-8 rounded-full flex items-center justify-center font-bold hover:bg-rose-100 shadow-sm" title="Yeni Ekle">+</button>
+                    </div>
                     <div class="text-4xl mb-4">💡</div>
                     <h3 class="text-xs font-black text-rose-400 uppercase tracking-widest mb-4">Günün İlişki Tavsiyesi</h3>
                     <p id="daily-relationship-note" class="text-xl text-slate-700 font-medium italic leading-relaxed">...</p>
@@ -195,51 +198,47 @@
     </div>
 
     <div id="admin-sidebar" class="fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-[10000] flex flex-col">
-        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
             <h2 class="font-bold text-slate-800 text-lg">Yönetim Paneli</h2>
             <button onclick="toggleAdmin()" class="text-2xl text-slate-300 hover:text-rose-500">&times;</button>
         </div>
-        
         <div class="flex border-b border-slate-100">
-            <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 py-3 text-xs font-bold uppercase text-slate-500 tab-btn active">Günlük İşler</button>
+            <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 py-3 text-xs font-bold uppercase text-slate-500 tab-btn active">Günlük</button>
+            <button onclick="switchTab('data')" id="tab-data" class="flex-1 py-3 text-xs font-bold uppercase text-slate-500 tab-btn">Veri Havuzu</button>
             <button onclick="switchTab('settings')" id="tab-settings" class="flex-1 py-3 text-xs font-bold uppercase text-slate-500 tab-btn">Ayarlar</button>
         </div>
-
-        <div class="flex-1 overflow-y-auto p-6">
+        <div class="flex-1 overflow-y-auto p-6 bg-white">
             <div id="content-daily" class="space-y-8">
-                <div class="bg-rose-50 p-4 rounded-2xl">
-                    <label class="text-[10px] font-black text-rose-400 block mb-2 uppercase">Güne Özel Mesaj Ekle/Güncelle</label>
-                    <input type="date" id="admin-quote-date" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-rose-100">
-                    <textarea id="admin-quote-text" class="w-full bg-white p-2 rounded-lg mb-2 text-xs h-16 border border-rose-100" placeholder="Mesaj..."></textarea>
-                    <button onclick="saveAdminQuote()" class="w-full bg-rose-500 text-white py-2 rounded-lg text-xs font-bold shadow-md">KAYDET</button>
+                <div class="bg-rose-50 p-4 rounded-2xl border border-rose-100">
+                    <label class="text-[10px] font-black text-rose-400 block mb-2 uppercase">Güne Özel Mesaj</label>
+                    <input type="date" id="admin-quote-date" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-rose-200 outline-none">
+                    <textarea id="admin-quote-text" class="w-full bg-white p-2 rounded-lg mb-2 text-xs h-20 border border-rose-200 outline-none resize-none" placeholder="Mesaj..."></textarea>
+                    <button onclick="saveAdminQuote()" class="w-full bg-rose-500 text-white py-2 rounded-lg text-xs font-bold shadow-md hover:bg-rose-600">KAYDET</button>
                 </div>
-
-                <div class="bg-slate-50 p-4 rounded-2xl">
-                    <label class="text-[10px] font-black text-slate-400 block mb-2 uppercase">Yeni Motto Ekle</label>
-                    <input type="text" id="admin-motto-text" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-slate-200" placeholder="Motto...">
-                    <button onclick="saveAdminMotto()" class="w-full bg-slate-700 text-white py-2 rounded-lg text-xs font-bold shadow-md">EKLE</button>
-                </div>
-
-                <div class="border-t border-slate-100 pt-4">
-                    <h4 class="text-[10px] font-black text-slate-400 uppercase mb-2">Kayıtlı Günler</h4>
-                    <div id="admin-quote-list" class="max-h-48 overflow-y-auto space-y-1"></div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <label class="text-[10px] font-black text-slate-400 block mb-2 uppercase">Yeni Motto</label>
+                    <input type="text" id="admin-motto-text" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-slate-200 outline-none" placeholder="Motto...">
+                    <button onclick="saveAdminMotto()" class="w-full bg-slate-700 text-white py-2 rounded-lg text-xs font-bold shadow-md hover:bg-slate-800">EKLE</button>
                 </div>
             </div>
-
+            <div id="content-data" class="space-y-6 hidden">
+                <div><h3 class="text-xs font-bold text-rose-600 mb-2 uppercase">Kayıtlı Günler</h3><div id="admin-quote-list" class="h-48 overflow-y-auto border border-rose-100 rounded-lg p-2 bg-rose-50/50 space-y-1 custom-scroll"></div></div>
+                <div><h3 class="text-xs font-bold text-emerald-600 mb-2 uppercase">Mottolar</h3><div id="admin-full-motto-list" class="h-32 overflow-y-auto border border-emerald-100 rounded-lg p-2 bg-emerald-50/50 space-y-1 custom-scroll"></div></div>
+                <div><h3 class="text-xs font-bold text-amber-600 mb-2 uppercase">Notlar</h3><div id="admin-full-note-list" class="h-32 overflow-y-auto border border-amber-100 rounded-lg p-2 bg-amber-50/50 space-y-1 custom-scroll"></div></div>
+            </div>
             <div id="content-settings" class="space-y-8 hidden">
                 <div class="bg-violet-50 p-4 rounded-2xl border border-violet-100">
                     <label class="text-[10px] font-black text-violet-500 block mb-2 uppercase">Şarkı Ekle (URL)</label>
                     <input type="text" id="song-title" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-violet-200" placeholder="Şarkı Adı">
                     <input type="text" id="song-url" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-violet-200" placeholder="MP3 Linki">
-                    <button onclick="addSongToPlaylist()" class="w-full bg-violet-600 text-white py-2 rounded-lg text-xs font-bold shadow-md">LİSTEYE EKLE</button>
-                    <div id="admin-playlist" class="mt-4 space-y-1 max-h-32 overflow-y-auto"></div>
+                    <button onclick="addSongToPlaylist()" class="w-full bg-violet-600 text-white py-2 rounded-lg text-xs font-bold shadow-md hover:bg-violet-700">LİSTEYE EKLE</button>
+                    <div id="admin-playlist" class="mt-4 space-y-1 max-h-32 overflow-y-auto custom-scroll"></div>
                 </div>
-
-                <div class="border-t border-slate-100 pt-4 space-y-4">
-                    <p class="text-[9px] text-slate-400 text-center uppercase tracking-widest">Veritabanı Araçları</p>
-                    <button onclick="uploadBulkQuotes()" class="w-full bg-indigo-50 text-indigo-600 py-3 rounded-lg text-xs font-bold border border-indigo-100 hover:bg-indigo-100">1 Yıllık Sözleri Yükle</button>
-                    <button onclick="uploadBulkMottos()" class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-lg text-xs font-bold border border-emerald-100 hover:bg-emerald-100">Mottoları Yükle</button>
-                    <button onclick="uploadBulkNotes()" class="w-full bg-amber-50 text-amber-600 py-3 rounded-lg text-xs font-bold border border-amber-100 hover:bg-amber-100">İlişki Notlarını Yükle</button>
+                <div class="border-t border-slate-100 pt-4 space-y-3">
+                    <p class="text-[9px] text-slate-400 text-center uppercase tracking-widest">Toplu İşlemler (Tek Seferlik)</p>
+                    <button onclick="uploadBulkQuotes()" class="w-full bg-indigo-50 text-indigo-600 py-3 rounded-lg text-xs font-bold border border-indigo-100 hover:bg-indigo-100">🚀 1 YILLIK SÖZLERİ YÜKLE</button>
+                    <button onclick="uploadBulkMottos()" class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-lg text-xs font-bold border border-emerald-100 hover:bg-emerald-100">🌿 MOTTOLARI YÜKLE</button>
+                    <button onclick="uploadBulkNotes()" class="w-full bg-amber-50 text-amber-600 py-3 rounded-lg text-xs font-bold border border-amber-100 hover:bg-amber-100">💡 İLİŞKİ NOTLARINI YÜKLE</button>
                 </div>
             </div>
         </div>
@@ -250,7 +249,7 @@
             <button onclick="document.getElementById('login-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-300 text-xl">&times;</button>
             <h3 class="text-xl font-romantic text-rose-600 mb-6">Hoş Geldiniz</h3>
             <input type="password" id="password-input" class="w-full text-center text-lg tracking-[5px] p-3 border-b-2 border-rose-100 outline-none focus:border-rose-500 mb-6 font-bold text-rose-900" placeholder="****">
-            <button onclick="attemptLogin()" class="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 rounded-xl font-bold shadow-lg">GİRİŞ</button>
+            <button onclick="attemptLogin()" class="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 rounded-xl font-bold shadow-lg hover:scale-105 transition-transform">GİRİŞ</button>
         </div>
     </div>
 
@@ -274,7 +273,7 @@
             <button onclick="document.getElementById('note-modal').classList.add('hidden')" class="absolute top-3 right-3 text-slate-300">&times;</button>
             <h3 class="font-bold text-rose-600 mb-4 text-center">İlişki Notu Ekle</h3>
             <textarea id="note-input" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm h-24 mb-4 outline-none focus:border-rose-400" placeholder="Bir tavsiye yaz..."></textarea>
-            <button onclick="saveRelationshipNote()" class="w-full bg-rose-500 text-white py-2 rounded-xl font-bold text-sm">EKLE</button>
+            <button onclick="saveRelationshipNote()" class="w-full bg-rose-500 text-white py-2 rounded-xl font-bold text-sm hover:bg-rose-600">EKLE</button>
         </div>
     </div>
 
@@ -296,28 +295,12 @@
         let currentUser = localStorage.getItem('bizim_user');
         let mottos = ["Aile, sevginin başladığı yerdir."];
         let quotes = {};
+        let notesPool = [];
         let playlist = [];
         let currentSongIndex = 0;
         const audio = document.getElementById('audio-element');
 
-        // --- UI FUNCTIONS ---
-        function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); }
-        function openNoteModal() { document.getElementById('note-modal').classList.remove('hidden'); }
-        function toggleAdmin() { document.getElementById('admin-sidebar').classList.toggle('translate-x-full'); }
-        function toggleMemoryForm() { document.getElementById('memory-form').classList.toggle('hidden'); }
-        function showToast(msg) { 
-            const t = document.getElementById('toast'); t.innerText = msg; 
-            t.classList.remove('opacity-0'); setTimeout(() => t.classList.add('opacity-0'), 3000); 
-        }
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'text-rose-600'));
-            document.getElementById('tab-' + tab).classList.add('active');
-            document.getElementById('content-daily').classList.add('hidden');
-            document.getElementById('content-settings').classList.add('hidden');
-            document.getElementById('content-' + tab).classList.remove('hidden');
-        }
-
-        // --- AUTH (Şak diye açılma) ---
+        // --- AUTH: ANINDA AÇILIŞ (SPA MANTIĞI) ---
         function attemptLogin() {
             const pass = document.getElementById('password-input').value;
             let user = null;
@@ -330,45 +313,98 @@
                 document.getElementById('password-input').value = '';
                 showToast(`Hoş geldin ${user} ❤️`);
                 
-                // Anında UI güncelle (Sayfa yenilemeye gerek yok)
-                document.getElementById('secure-layer').classList.remove('blur-lock');
-                document.getElementById('lock-overlay').classList.add('hidden');
-                document.getElementById('login-trigger-btn').classList.add('hidden');
-                document.getElementById('user-info-panel').classList.remove('hidden');
-                document.getElementById('welcome-text').innerText = user;
-                if(user === 'İlker') document.getElementById('admin-btn').classList.remove('hidden');
+                // SAYFA YENİLEMEDEN DOM'U AÇ
+                applyLoggedInState(user); 
                 
-                startPrivateListeners(); // Verileri çekmeye başla
+                // VERİLERİ ÇEKMEYE BAŞLA
+                startPrivateListeners(); 
             } else {
                 showToast('Şifre hatalı!');
             }
         }
 
-        function logout() { 
-            localStorage.removeItem('bizim_user'); 
-            currentUser = null; 
-            window.location.reload(); 
+        function applyLoggedInState(user) {
+            // Kilidi kaldır
+            document.getElementById('counters-wrapper').classList.remove('blur-lock');
+            document.getElementById('counters-wrapper').classList.add('unlocked');
+            
+            document.getElementById('quote-wrapper').classList.remove('blur-lock');
+            document.getElementById('quote-wrapper').classList.add('unlocked');
+            
+            document.getElementById('secure-layer').classList.remove('hidden-opacity');
+            document.getElementById('secure-layer').classList.add('visible-opacity');
+            
+            document.getElementById('login-trigger-btn').classList.add('hidden');
+            document.getElementById('user-info-panel').classList.remove('hidden');
+            document.getElementById('user-info-panel').classList.add('flex');
+            
+            document.getElementById('welcome-text').innerText = user;
+            if(user === 'İlker') document.getElementById('admin-btn').classList.remove('hidden');
         }
 
-        // --- CHAT ---
+        function logout() { localStorage.removeItem('bizim_user'); currentUser = null; window.location.reload(); }
+
+        // --- UI ---
+        function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); }
+        function openNoteModal() { document.getElementById('note-modal').classList.remove('hidden'); }
+        function toggleAdmin() { document.getElementById('admin-sidebar').classList.toggle('translate-x-full'); }
+        function toggleMemoryForm() { document.getElementById('memory-form').classList.toggle('hidden'); }
+        function showToast(msg) { 
+            const t = document.getElementById('toast'); t.innerText = msg; t.classList.remove('opacity-0'); 
+            setTimeout(() => t.classList.add('opacity-0'), 3000); 
+        }
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'text-rose-600'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            ['daily','data','settings'].forEach(t => document.getElementById('content-' + t).classList.add('hidden'));
+            document.getElementById('content-' + tab).classList.remove('hidden');
+        }
+
+        // --- HELPER: IMAGE COMPRESSION ---
+        function compressImage(file, maxWidth, quality) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = event => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = error => reject(error);
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // --- FEATURES ---
+        function showRandomNote() {
+            if(notesPool.length > 0) {
+                document.getElementById('daily-relationship-note').innerText = `"${notesPool[Math.floor(Math.random() * notesPool.length)]}"`;
+            }
+        }
+
         function sendChat() {
             const inp = document.getElementById('chat-input');
             const text = inp.value.trim();
             if(!text || !currentUser) return showToast("Giriş yapın!");
             DB_ROOT.collection('chat').add({ text, sender: currentUser, createdAt: Date.now() }).then(() => inp.value = '');
         }
-        function deleteChat(id) {
-            if(confirm("Silmek istiyor musun?")) DB_ROOT.collection('chat').doc(id).delete();
-        }
-
-        // --- REQUESTS (ZARF) ---
+        function deleteChat(id) { if(confirm("Silmek istiyor musun?")) DB_ROOT.collection('chat').doc(id).delete(); }
+        
         function sendRequest() {
             const inp = document.getElementById('request-input');
             const text = inp.value.trim();
             if(!text || !currentUser) return;
             const target = currentUser === 'İlker' ? 'Derya' : 'İlker';
-            DB_ROOT.collection('requests').add({ text, from: currentUser, to: target, createdAt: Date.now() })
-            .then(() => { inp.value = ''; showToast('Zarf gönderildi 💌'); });
+            DB_ROOT.collection('requests').add({ text, from: currentUser, to: target, createdAt: Date.now() }).then(() => { inp.value = ''; showToast('Zarf yollandı 💌'); });
         }
         function openEnvelope(text, sender) {
             document.getElementById('envelope-content').innerText = text;
@@ -376,47 +412,46 @@
             document.getElementById('envelope-modal').classList.remove('hidden');
         }
 
-        // --- MEMORY ---
-        function saveMemory() {
+        function saveRelationshipNote() {
+            const inp = document.getElementById('note-input');
+            if(!inp.value.trim()) return;
+            DB_ROOT.collection('notes').add({ text: inp.value.trim(), createdAt: Date.now() }).then(() => { inp.value = ''; document.getElementById('note-modal').classList.add('hidden'); showToast('Not eklendi'); });
+        }
+
+        async function saveMemory() {
             const date = document.getElementById('mem-date').value;
             const desc = document.getElementById('mem-desc').value;
             const file = document.getElementById('mem-file').files[0];
             if(!date || !desc || !file) return showToast('Eksik bilgi!');
-            const reader = new FileReader();
-            reader.onload = e => {
-                DB_ROOT.collection('memories').add({ date, desc, image: e.target.result, addedBy: currentUser, createdAt: Date.now() })
-                .then(() => { document.getElementById('memory-form').classList.add('hidden'); showToast('Anı eklendi ✨'); });
-            };
-            reader.readAsDataURL(file);
+            
+            showToast('Fotoğraf işleniyor...');
+            try {
+                const compressed = await compressImage(file, 800, 0.7);
+                await DB_ROOT.collection('memories').add({ date, desc, image: compressed, addedBy: currentUser, createdAt: Date.now() });
+                document.getElementById('memory-form').classList.add('hidden'); showToast('Anı eklendi ✨');
+            } catch(e) { showToast('Hata: Resim yüklenemedi'); }
         }
-        function deleteMemory(id) {
-            if(confirm("Bu anıyı silmek istiyor musun?")) DB_ROOT.collection('memories').doc(id).delete();
-        }
-
-        // --- RELATIONSHIP NOTE ---
-        function saveRelationshipNote() {
-            const inp = document.getElementById('note-input');
-            if(!inp.value.trim()) return;
-            DB_ROOT.collection('notes').add({ text: inp.value.trim(), createdAt: Date.now() })
-            .then(() => { inp.value = ''; document.getElementById('note-modal').classList.add('hidden'); showToast('Not eklendi'); });
-        }
+        function deleteMemory(id) { if(confirm("Silmek istiyor musun?")) DB_ROOT.collection('memories').doc(id).delete(); }
 
         // --- ADMIN ---
         function saveAdminQuote() {
             const d = document.getElementById('admin-quote-date').value;
             const t = document.getElementById('admin-quote-text').value;
             if(d && t) {
-                const key = d.split('-').reverse().slice(0,2).join('-'); // YYYY-MM-DD -> DD-MM
-                DB_ROOT.collection('quotes').doc(key).set({ text: t }).then(() => showToast('Güncellendi/Kaydedildi'));
+                const key = d.split('-').reverse().slice(0,2).join('-'); 
+                DB_ROOT.collection('quotes').doc(key).set({ text: t }).then(() => { showToast('Güncellendi'); });
             }
         }
+        function deleteAdminQuote(id) { if(confirm("Sil?")) DB_ROOT.collection('quotes').doc(id).delete(); }
         function saveAdminMotto() {
             const t = document.getElementById('admin-motto-text').value;
             if(t) DB_ROOT.set({ mottos: [...mottos, t] }, { merge: true }).then(() => showToast('Motto eklendi'));
         }
-        function deleteAdminQuote(id) {
-            if(confirm("Silinsin mi?")) DB_ROOT.collection('quotes').doc(id).delete();
+        function deleteAdminMotto(idx) {
+            const newList = mottos.filter((_, i) => i !== idx);
+            DB_ROOT.set({ mottos: newList }, { merge: true });
         }
+        function deleteAdminNote(id) { if(confirm("Sil?")) DB_ROOT.collection('notes').doc(id).delete(); }
 
         // --- MUSIC ---
         function addSongToPlaylist() {
@@ -424,7 +459,7 @@
             const url = document.getElementById('song-url').value;
             if(!title || !url) return showToast("Eksik bilgi!");
             DB_ROOT.collection('playlist').add({ title, url, createdAt: Date.now() }).then(() => {
-                document.getElementById('song-title').value = ''; document.getElementById('song-url').value = ''; showToast('Şarkı Eklendi');
+                document.getElementById('song-title').value = ''; document.getElementById('song-url').value = ''; showToast('Eklendi');
             });
         }
         function deleteSong(id) { if(confirm("Sil?")) DB_ROOT.collection('playlist').doc(id).delete(); }
@@ -446,57 +481,53 @@
 
         // --- LISTENERS ---
         function startPublicListeners() {
-            // MOTTOLAR
             DB_ROOT.onSnapshot(doc => {
                 if(doc.exists && doc.data().mottos) {
                     mottos = doc.data().mottos;
                     document.getElementById('top-motto').innerText = `"${mottos[Math.floor(Math.random() * mottos.length)]}"`;
+                    if(currentUser === 'İlker') document.getElementById('admin-full-motto-list').innerHTML = mottos.map((m, i) => `<div class="flex justify-between p-1 border-b border-emerald-100 text-[10px]"><span class="truncate">${m}</span><button onclick="deleteAdminMotto(${i})" class="text-emerald-500 font-bold">x</button></div>`).join('');
                 }
             });
-            // GÜNLÜK MESAJ
             DB_ROOT.collection('quotes').onSnapshot(snap => {
                 quotes = {}; snap.forEach(doc => quotes[doc.id] = doc.data().text);
                 const now = new Date();
                 const key = `${String(now.getDate()).padStart(2,'0')}-${String(now.getMonth()+1).padStart(2,'0')}`;
                 document.getElementById('daily-message-display').innerText = quotes[key] ? `"${quotes[key]}"` : '"Seni seviyorum."';
-                
-                // Admin Listesini Güncelle
                 if(currentUser === 'İlker') {
-                    document.getElementById('admin-quote-list').innerHTML = Object.keys(quotes).sort().map(k => `
-                        <div class="flex justify-between items-center text-[10px] border-b border-slate-100 p-2">
-                            <span class="font-bold text-rose-500">${k}</span>
-                            <span class="truncate flex-1 mx-2 text-slate-500">${quotes[k]}</span>
-                            <button onclick="deleteAdminQuote('${k}')" class="text-red-400 font-bold hover:text-red-600">X</button>
-                        </div>
-                    `).join('');
+                    const listHtml = Object.keys(quotes).sort().map(k => `<div class="flex justify-between items-center text-[10px] border-b border-rose-100 p-2 hover:bg-rose-50"><span class="font-bold text-rose-500 w-10">${k}</span><span class="truncate flex-1 mx-2 text-slate-500">${quotes[k]}</span><button onclick="deleteAdminQuote('${k}')" class="text-red-400 font-bold hover:text-red-600 px-2">X</button></div>`).join('');
+                    document.getElementById('admin-quote-list').innerHTML = listHtml;
+                    document.getElementById('admin-full-quote-list').innerHTML = listHtml;
                 }
+            });
+            DB_ROOT.collection('playlist').orderBy('createdAt', 'desc').onSnapshot(snap => {
+                playlist = snap.docs.map(d => ({id:d.id, ...d.data()}));
+                if(currentUser === 'İlker') document.getElementById('admin-playlist').innerHTML = playlist.map(s => `<div class="flex justify-between p-1 border-b text-[10px]"><span class="truncate w-32">${s.title}</span><button onclick="deleteSong('${s.id}')" class="text-rose-500 font-bold">x</button></div>`).join('');
+                if(playlist.length > 0 && audio.src === "") { currentSongIndex = 0; audio.src = playlist[0].url; document.getElementById('current-song-title').innerText = playlist[0].title; document.getElementById('music-player-bar').classList.remove('translate-y-full'); }
             });
         }
 
         function startPrivateListeners() {
-            // İLİŞKİ NOTU
             DB_ROOT.collection('notes').onSnapshot(snap => {
                 if(snap.empty) return;
-                const notes = snap.docs.map(d => d.data().text);
+                const notesData = snap.docs.map(d => ({id: d.id, text: d.data().text}));
+                notesPool = notesData.map(n => n.text);
                 const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-                document.getElementById('daily-relationship-note').innerText = `"${notes[dayOfYear % notes.length]}"`;
+                document.getElementById('daily-relationship-note').innerText = `"${notesPool[dayOfYear % notesPool.length]}"`;
+                if(currentUser === 'İlker') document.getElementById('admin-full-note-list').innerHTML = notesData.map(n => `<div class="flex justify-between p-1 border-b border-amber-100 text-[10px]"><span class="truncate">${n.text}</span><button onclick="deleteAdminNote('${n.id}')" class="text-amber-500 font-bold">x</button></div>`).join('');
             });
-            // CHAT
             DB_ROOT.collection('chat').orderBy('createdAt', 'asc').onSnapshot(snap => {
                 document.getElementById('chat-container').innerHTML = snap.docs.map(doc => {
                     const m = doc.data(); const isMe = m.sender === currentUser;
-                    return `<div class="flex ${isMe?'justify-end':'justify-start'} mb-2 relative group"><div class="${isMe?'bg-rose-500 text-white':'bg-white border text-slate-600'} rounded-xl px-3 py-2 text-sm shadow-sm max-w-[80%] relative">${m.text}${isMe ? `<button onclick="deleteChat('${doc.id}')" class="absolute -top-2 -right-2 bg-slate-800 text-white w-4 h-4 rounded-full text-[8px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">x</button>` : ''}</div></div>`;
+                    return `<div class="flex ${isMe?'justify-end':'justify-start'} mb-2 relative group"><div class="${isMe?'bg-rose-500 text-white':'bg-white border text-slate-600'} rounded-xl px-3 py-2 text-sm shadow-sm max-w-[80%] relative pr-6">${m.text}${isMe ? `<button onclick="deleteChat('${doc.id}')" class="absolute -top-2 -right-2 bg-slate-800 text-white w-4 h-4 rounded-full text-[8px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">x</button>` : ''}</div></div>`;
                 }).join('');
                 document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
             });
-            // TALEPLER
             DB_ROOT.collection('requests').orderBy('createdAt', 'desc').onSnapshot(snap => {
                 const incoming = [], outgoing = [];
                 snap.forEach(doc => { const d = doc.data(); (d.to === currentUser ? incoming : outgoing).push(d); });
                 document.getElementById('incoming-requests').innerHTML = incoming.map(r => `<div class="postal-envelope" onclick="openEnvelope('${r.text.replace(/'/g, "\\'")}', '${r.from}')"><div class="font-bold text-sm text-rose-600">Kimden: ${r.from}</div><div class="text-[10px] text-slate-400">Bir mesajın var...</div></div>`).join('');
-                document.getElementById('outgoing-requests').innerHTML = outgoing.map(r => `<div class="postal-envelope outgoing opacity-70" onclick="openEnvelope('${r.text.replace(/'/g, "\\'")}', 'Ben')"><div class="font-bold text-sm text-indigo-500">Kime: ${r.to}</div><div class="text-[10px] text-slate-400">Okumak için tıkla</div></div>`).join('');
+                document.getElementById('outgoing-requests').innerHTML = outgoing.map(r => `<div class="postal-envelope outgoing" onclick="openEnvelope('${r.text.replace(/'/g, "\\'")}', 'Ben')"><div class="font-bold text-sm text-indigo-500">Kime: ${r.to}</div><div class="text-[10px] text-slate-400">Okumak için tıkla</div></div>`).join('');
             });
-            // ANILAR
             DB_ROOT.collection('memories').onSnapshot(snap => {
                 let mems = snap.docs.map(d => ({id:d.id, ...d.data()}));
                 const today = new Date();
@@ -510,12 +541,6 @@
                 if(window.memSwiper) window.memSwiper.destroy();
                 window.memSwiper = new Swiper(".memorySwiper", { navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" }, loop: true });
             });
-            // PLAYLIST
-            DB_ROOT.collection('playlist').orderBy('createdAt', 'desc').onSnapshot(snap => {
-                playlist = snap.docs.map(d => ({id:d.id, ...d.data()}));
-                if(currentUser === 'İlker') document.getElementById('admin-playlist').innerHTML = playlist.map(s => `<div class="flex justify-between p-1 border-b text-[10px]"><span class="truncate w-32">${s.title}</span><button onclick="deleteSong('${s.id}')" class="text-rose-500 font-bold">x</button></div>`).join('');
-                if(playlist.length > 0 && audio.src === "") { currentSongIndex = 0; audio.src = playlist[0].url; document.getElementById('current-song-title').innerText = playlist[0].title; document.getElementById('music-player-bar').classList.remove('translate-y-full'); }
-            });
         }
 
         // --- INIT ---
@@ -526,24 +551,18 @@
             document.getElementById('counter-meeting').innerText = Math.floor((new Date() - tDate) / 86400000);
         }, 1000);
 
+        // SAYFA YÜKLENDİĞİNDE GİRİŞ KONTROLÜ (DOM MANİPÜLASYONU)
         if(currentUser) { 
-            // Direkt açılış
-            document.getElementById('secure-layer').classList.remove('blur-lock');
-            document.getElementById('lock-overlay').classList.add('hidden');
-            document.getElementById('login-trigger-btn').classList.add('hidden');
-            document.getElementById('user-info-panel').classList.remove('hidden');
-            document.getElementById('welcome-text').innerText = currentUser;
-            if(currentUser === 'İlker') document.getElementById('admin-btn').classList.remove('hidden');
+            applyLoggedInState(currentUser); // Anında kilidi aç
             startPrivateListeners();
-        } else {
-            document.getElementById('secure-layer').classList.add('blur-lock');
         }
 
         document.getElementById('chat-input').addEventListener('keydown', e => { if(e.key==='Enter') sendChat() });
         document.getElementById('request-input').addEventListener('keydown', e => { if(e.key==='Enter') sendRequest() });
+        document.getElementById('password-input').addEventListener('keydown', e => { if(e.key==='Enter') attemptLogin() });
 
-        // --- BULK FUNCTIONS (GEREKTİĞİNDE KULLAN) ---
-        async function uploadBulkQuotes(){ if(confirm('Yüklensin mi?')) { /* Bulk Data */ showToast('Veriler önceki yanıttan alınmalı'); } }
+        // BULK FUNCTIONS
+        async function uploadBulkQuotes(){ if(confirm('Yüklensin mi?')) { /* Bulk Data */ showToast('Veri seti önceki yanıttan alınmalı'); } }
         async function uploadBulkMottos(){ if(confirm('Yüklensin mi?')) { /* Bulk Data */ } }
         async function uploadBulkNotes(){ if(confirm('Yüklensin mi?')) { /* Bulk Data */ } }
     </script>
