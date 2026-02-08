@@ -126,9 +126,9 @@
                             <span id="mode-text">Gözlemci</span>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="window.login('Derya')" id="btn-login-derya" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4">Derya</button>
+                            <button onclick="window.login('Derya')" id="btn-login-derya" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">Derya</button>
                             <span class="text-rose-200">|</span>
-                            <button onclick="window.login('İlker')" id="btn-login-ilker" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4">İlker</button>
+                            <button onclick="window.login('İlker')" id="btn-login-ilker" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">İlker</button>
                         </div>
                         <button onclick="window.toggleAdmin()" id="manage-btn" class="hidden-mode btn-love px-8 py-2.5 text-[10px] uppercase shadow-lg ml-4">🛠️ Panel</button>
                         <button onclick="window.logout()" id="logout-btn" class="hidden-mode text-[10px] font-black uppercase text-rose-300 ml-4 cursor-pointer">Çıkış</button>
@@ -156,9 +156,9 @@
 
                 <div class="glass-card p-8 rounded-[2.5rem] border-rose-50 text-center">
                     <div class="grid grid-cols-1 gap-2">
-                        <p class="text-[10px] text-rose-300 font-black uppercase tracking-widest">Tanışma: 10 Aralık 2011</p>
+                        <p class="text-[9px] text-rose-300 font-black uppercase tracking-widest">Tanışma: 10 Aralık 2011</p>
                         <p id="meeting-counter" class="text-3xl font-black text-rose-400">0</p>
-                        <p class="text-[10px] text-rose-300 font-black uppercase">Gündür Beraberiz</p>
+                        <p class="text-[9px] text-rose-300 font-black uppercase">Gündür Beraberiz</p>
                     </div>
                 </div>
             </div>
@@ -198,7 +198,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         // Firebase Config
-        const firebaseConfig = {
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyCbIuOJeKNpJToMg2-PsblLtue-mzElUQY",
             authDomain: "tezz-95f0d.firebaseapp.com",
             projectId: "tezz-95f0d",
@@ -208,7 +208,7 @@
             measurementId: "G-D2WLJXGP67"
         };
 
-        const appId = 'derya-ilker-private-v2';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'derya-ilker-private-v2';
         let currentUser = null; 
         let allNotes = [], quotesPool = [];
 
@@ -231,8 +231,15 @@
                 
                 await setPersistence(auth, browserLocalPersistence);
                 
+                // Kimlik doğrulama işlemi (Önce token sonra anonim)
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
+                    // Token geçersiz olabilir, try-catch içine alıyoruz
+                    try {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } catch(tokenErr) {
+                         console.warn("Token ile giriş yapılamadı, anonim deneniyor:", tokenErr);
+                         await signInAnonymously(auth);
+                    }
                 } else {
                     await signInAnonymously(auth);
                 }
@@ -244,27 +251,29 @@
                     }
                 });
             } catch (e) {
-                console.error("Firebase Hatası:", e);
+                console.error("Firebase Başlatma Hatası:", e);
                 showToast("Bulut bağlantısı kurulamadı.");
             }
 
-            setInterval(updateCounters, 1000 * 60);
+            setInterval(updateCounters, 1000 * 60 * 5);
             updateCounters();
         };
 
         const setupListeners = (db, user) => {
             if (!user) return;
 
-            // Notlar
+            // Notlar - Hata yakalayıcı eklendi
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), 
                 (snap) => {
                     allNotes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderNotes();
                 }, 
-                (err) => console.warn(err.message)
+                (err) => {
+                    console.warn("Not dinleyici hatası:", err.message);
+                }
             );
 
-            // 365 Gün Sözleri
+            // 365 Gün Sözleri - Hata yakalayıcı eklendi
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'quotes'), 
                 (snap) => {
                     if(snap.exists()) {
@@ -276,7 +285,9 @@
                     }
                     displayDailyMessage();
                 },
-                (err) => console.warn(err.message)
+                (err) => {
+                    console.warn("Söz dinleyici hatası:", err.message);
+                }
             );
         };
 
@@ -287,7 +298,10 @@
                     currentUser = snap.data().name;
                 }
                 updateUI();
-            } catch (e) { currentUser = null; updateUI(); }
+            } catch (e) { 
+                currentUser = null; 
+                updateUI(); 
+            }
         }
 
         window.login = async (name) => {
@@ -417,7 +431,9 @@
                 textEl.value = '';
                 showToast("Mesajın gökyüzüne fırlatıldı! 🚀");
                 if(!document.getElementById('admin-panel').classList.contains('translate-x-full')) window.toggleAdmin();
-            } catch (e) { showToast("Hata!"); }
+            } catch (e) {
+                showToast("Mesaj iletilemedi.");
+            }
         };
 
         window.saveQuotes = async () => {
@@ -429,7 +445,9 @@
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'quotes'), { list });
                 showToast("365 günlük hikayemiz güncellendi!");
-            } catch (e) { showToast("Hata!"); }
+            } catch (e) {
+                showToast("Güncelleme başarısız.");
+            }
         };
 
         window.deleteNote = async (id) => { 
