@@ -197,8 +197,8 @@
         import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Çevre yapılandırması
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+        // Firebase Config
+        const firebaseConfig = {
             apiKey: "AIzaSyCbIuOJeKNpJToMg2-PsblLtue-mzElUQY",
             authDomain: "tezz-95f0d.firebaseapp.com",
             projectId: "tezz-95f0d",
@@ -208,7 +208,7 @@
             measurementId: "G-D2WLJXGP67"
         };
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'derya-ilker-private-v2';
+        const appId = 'derya-ilker-private-v2';
         let currentUser = null; 
         let allNotes = [], quotesPool = [];
 
@@ -231,12 +231,8 @@
                 
                 await setPersistence(auth, browserLocalPersistence);
                 
-                // Kimlik doğrulama işlemi (Önce token sonra anonim)
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                // Kimlik doğrulama işlemi
+                await signInAnonymously(auth);
 
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
@@ -245,8 +241,7 @@
                     }
                 });
             } catch (e) {
-                console.error("Firebase Başlatma Hatası:", e);
-                showToast("Bulut bağlantısı kurulamadı.");
+                console.error("Firebase Hatası:", e);
             }
 
             setInterval(updateCounters, 1000 * 60 * 5);
@@ -256,18 +251,14 @@
         const setupListeners = (db, user) => {
             if (!user) return;
 
-            // Notlar - Hata yakalayıcı eklendi
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), 
                 (snap) => {
                     allNotes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderNotes();
                 }, 
-                (err) => {
-                    console.warn("Not dinleyici hatası:", err.message);
-                }
+                (err) => console.warn(err.message)
             );
 
-            // 365 Gün Sözleri - Hata yakalayıcı eklendi
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'quotes'), 
                 (snap) => {
                     if(snap.exists()) {
@@ -279,9 +270,7 @@
                     }
                     displayDailyMessage();
                 },
-                (err) => {
-                    console.warn("Söz dinleyici hatası:", err.message);
-                }
+                (err) => console.warn(err.message)
             );
         };
 
@@ -303,7 +292,7 @@
             const db = getFirestore();
             if (!auth.currentUser) return showToast("Bağlantı bekleniyor...");
             
-            const pass = prompt(`${name} için şifre girin:`);
+            const pass = prompt(`${name} için şifre:`);
             const correctPass = name === 'Derya' ? '1881' : '1992';
 
             if (pass === correctPass) {
@@ -322,7 +311,6 @@
         window.logout = async () => {
             const db = getFirestore();
             const auth = getAuth();
-            if (!auth.currentUser) return;
             currentUser = null;
             await setDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'profile', 'status'), { name: null });
             updateUI();
@@ -418,31 +406,27 @@
                 textEl.value = '';
                 showToast("Mesajın gökyüzüne fırlatıldı! 🚀");
                 if(!document.getElementById('admin-panel').classList.contains('translate-x-full')) window.toggleAdmin();
-            } catch (e) {
-                showToast("Mesaj iletilemedi.");
-            }
+            } catch (e) { showToast("Hata!"); }
         };
 
         window.saveQuotes = async () => {
-            if(currentUser !== 'İlker') return alert("Bu ayarlar sadece İlker'in kalbinden geçer. ❤️");
+            if(currentUser !== 'İlker') return alert("Sadece İlker güncelleyebilir.");
             const db = getFirestore();
             const area = document.getElementById('quotes-bulk');
             if(!area) return;
             const list = area.value.split('\n').filter(s => s.trim() !== "");
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'quotes'), { list });
-                showToast("365 günlük hikayemiz güncellendi!");
-            } catch (e) {
-                showToast("Güncelleme başarısız.");
-            }
+                showToast("Hikayemiz güncellendi!");
+            } catch (e) { showToast("Hata!"); }
         };
 
         window.deleteNote = async (id) => { 
-            if(confirm('Bu hatırayı silmek istiyor musun?')) {
+            if(confirm('Silinsin mi?')) {
                 try {
                     await deleteDoc(doc(getFirestore(), 'artifacts', appId, 'public', 'data', 'ozel_notlar', id));
                     showToast("Not silindi.");
-                } catch (e) { showToast("Silme hatası."); }
+                } catch (e) { showToast("Hata!"); }
             }
         };
 
