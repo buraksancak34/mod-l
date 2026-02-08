@@ -1,1 +1,459 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Derya & İlker - Bizim Dünyamız</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
 
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #fff5f5 0%, #fff1f2 100%);
+            color: #4c0519;
+            margin: 0; padding: 0; overflow-x: hidden; min-height: 100vh;
+        }
+
+        .romantic-font { font-family: 'Dancing Script', cursive; }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            border: 1px solid rgba(255, 192, 203, 0.6);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 40px rgba(159, 18, 57, 0.04);
+            transition: all 0.4s ease;
+        }
+        
+        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 15px 50px rgba(159, 18, 57, 0.1); }
+
+        .admin-sidebar {
+            background: rgba(255, 255, 255, 0.98);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -15px 0 50px rgba(0, 0, 0, 0.08);
+            z-index: 999999;
+        }
+
+        .custom-input {
+            background: #fff !important; border: 2px solid #ffe4e6 !important;
+            color: #881337 !important; padding: 12px !important;
+            border-radius: 16px !important; width: 100% !important;
+        }
+
+        .custom-input:focus { border-color: #fb7185 !important; outline: none; }
+
+        .btn-love {
+            background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+            color: white; border-radius: 20px; font-weight: 700;
+            transition: all 0.3s; cursor: pointer; border: none;
+        }
+        .btn-love:hover { filter: brightness(1.1); transform: scale(1.05); }
+
+        .hidden-mode { display: none !important; }
+        .heart-beat { animation: beat 1s infinite; display: inline-block; color: #e11d48; }
+        @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+
+        #toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #4c0519; color: white; padding: 12px 24px;
+            border-radius: 50px; font-size: 14px; font-weight: 600;
+            z-index: 1000000; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        }
+
+        .important-note {
+            color: #ef4444 !important;
+            font-weight: 800 !important;
+        }
+
+        #daily-quote-area {
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .quote-active-text {
+            animation: slideUp 1s ease forwards;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="toast">İşlem Başarılı!</div>
+
+    <!-- Editör Paneli -->
+    <div id="admin-panel" class="fixed top-0 right-0 h-full w-80 admin-sidebar translate-x-full overflow-y-auto p-8 border-l border-rose-100">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl font-black text-rose-800 flex items-center gap-2">🛠️ Editör Paneli</h2>
+            <button onclick="window.toggleAdmin()" class="text-rose-300 hover:text-rose-600 text-3xl">&times;</button>
+        </div>
+
+        <div class="flex gap-1 mb-8 bg-rose-50 p-1 rounded-2xl">
+            <button onclick="window.switchTab('notes')" id="tab-notes" class="tab-btn active flex-1 text-[10px] font-bold py-2 rounded-xl">NOT BIRAK</button>
+            <button onclick="window.switchTab('quotes')" id="tab-quotes" class="tab-btn inactive flex-1 text-[10px] font-bold py-2 rounded-xl">365 GÜN</button>
+        </div>
+        
+        <!-- Not Bırakma -->
+        <div id="sidebar-notes-content" class="space-y-4">
+            <h3 class="text-rose-600 text-[10px] font-black uppercase" id="note-target-label">Sevgiline Not Bırak</h3>
+            <textarea id="note-text" placeholder="Kalbinden geçenleri buraya dök..." class="custom-input h-32"></textarea>
+            <button onclick="window.addNote()" class="w-full py-4 btn-love text-sm">NOTU İLET</button>
+        </div>
+
+        <!-- 365 Gün Yönetimi -->
+        <div id="sidebar-quotes-content" class="hidden space-y-4">
+            <h3 class="text-rose-600 text-[10px] font-black uppercase">365 Günlük Mesaj Havuzu</h3>
+            <p class="text-[9px] text-rose-400 italic">Her satıra bir cümle yaz. Sırayla her gün bir tanesi görünecek.</p>
+            <textarea id="quotes-bulk" placeholder="Sözleri buraya alt alta girin..." class="custom-input h-64 text-xs"></textarea>
+            <button onclick="window.saveQuotes()" class="w-full py-4 btn-love text-sm">LİSTEYİ GÜNCELLE</button>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 py-12">
+        <header class="flex flex-col md:flex-row justify-between items-start mb-20 gap-12">
+            <div class="text-center md:text-left flex-1">
+                <h1 class="text-6xl md:text-8xl romantic-font text-rose-600 leading-tight">Derya ve İlker</h1>
+                <p class="text-rose-400 text-lg mt-2 font-medium tracking-wide">On yıldır aynı gökyüzüne bakmak... <span class="heart-beat">♥</span></p>
+                
+                <div class="mt-10 flex flex-col gap-8 items-center md:items-start w-full">
+                    <!-- Giriş ve Durum Paneli -->
+                    <div class="flex flex-wrap gap-3 justify-center md:justify-start items-center">
+                        <div id="mode-status" class="bg-white px-5 py-2.5 rounded-full border border-rose-100 text-rose-400 text-[10px] font-black uppercase tracking-widest shadow-sm">
+                            <span id="mode-text">Gözlemci</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="window.login('Derya')" id="btn-login-derya" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">Derya</button>
+                            <span class="text-rose-200">|</span>
+                            <button onclick="window.login('İlker')" id="btn-login-ilker" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">İlker</button>
+                        </div>
+                        <button onclick="window.toggleAdmin()" id="manage-btn" class="hidden-mode btn-love px-8 py-2.5 text-[10px] uppercase shadow-lg ml-4">🛠️ Yönetim</button>
+                        <button onclick="window.logout()" id="logout-btn" class="hidden-mode text-[10px] font-black uppercase text-rose-300 ml-4 cursor-pointer">Çıkış</button>
+                    </div>
+
+                    <!-- Günlük Mesaj Alanı -->
+                    <div id="daily-quote-area" class="max-w-2xl w-full glass-card p-10 rounded-[3rem] border-rose-200">
+                        <div id="quote-display-box" class="text-center">
+                            <h4 class="text-[9px] font-black text-rose-300 uppercase tracking-[4px] mb-4">Günün Kalp Atışı</h4>
+                            <p id="current-quote" class="text-rose-800 text-xl md:text-2xl font-bold italic leading-relaxed">Görmek için giriş yapmalısın sevgilim...</p>
+                            <div class="h-1 w-20 bg-rose-200 mx-auto mt-6 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sayaç Paneli -->
+            <div class="flex flex-col gap-6 w-full md:w-[380px]">
+                <div class="glass-card p-10 rounded-[3rem] text-center relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 text-rose-100 text-9xl opacity-20">♥</div>
+                    <h3 class="text-rose-400 text-[10px] font-black uppercase tracking-[3px] mb-4">Evliliğimizde</h3>
+                    <div id="marriage-counter" class="text-6xl font-black text-rose-600 mb-2">0</div>
+                    <p class="text-rose-400 text-sm font-bold uppercase tracking-widest">Muhteşem Gün</p>
+                </div>
+
+                <div class="glass-card p-8 rounded-[2.5rem] border-rose-50 text-center">
+                    <div class="grid grid-cols-1 gap-2">
+                        <p class="text-[10px] text-rose-300 font-black uppercase tracking-widest">Tanışma: 10 Aralık 2011</p>
+                        <p id="meeting-counter" class="text-3xl font-black text-rose-400">0</p>
+                        <p class="text-[10px] text-rose-300 font-black uppercase">Gündür Beraberiz</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Notlar Bölümü -->
+        <section id="notes-section" class="mt-20">
+            <h2 id="notes-title" class="text-3xl font-black text-rose-900 uppercase mb-8 px-4">📍 Özel Notlar</h2>
+            <div class="glass-card rounded-[3rem] overflow-hidden border-none shadow-xl min-h-[250px]">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead class="bg-rose-50 text-rose-400 uppercase text-[10px] font-black tracking-widest">
+                            <tr>
+                                <th class="px-8 py-6">TARİH</th>
+                                <th class="px-8 py-6">KİMDEN</th>
+                                <th class="px-8 py-6">MESAJ</th>
+                                <th class="px-8 py-6 text-right">EYLEM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="notes-body" class="divide-y divide-rose-50">
+                            <tr><td colspan="4" class="p-24 text-center text-rose-200 italic font-bold">Notları sadece siz görebilirsiniz. Lütfen giriş yapın...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <footer class="mt-32 text-center text-rose-300 text-xs font-bold pb-10 uppercase tracking-widest">
+            Sonsuzluğa kadar... Derya & İlker
+        </footer>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCbIuOJeKNpJToMg2-PsblLtue-mzElUQY",
+            authDomain: "tezz-95f0d.firebaseapp.com",
+            projectId: "tezz-95f0d",
+            storageBucket: "tezz-95f0d.firebasestorage.app",
+            messagingSenderId: "87135277271",
+            appId: "1:87135277271:web:49cc5d5ee7b473bfa7a092",
+            measurementId: "G-D2WLJXGP67"
+        };
+
+        const appId = 'derya-ilker-private-v2';
+        let currentUser = null; 
+        let allNotes = [], quotesPool = [];
+
+        const meetingDate = new Date('2011-12-10');
+        const marriageDate = new Date('2019-10-27');
+
+        const showToast = (msg) => {
+            const t = document.getElementById('toast');
+            if(t) {
+                t.innerText = msg; t.style.opacity = "1";
+                setTimeout(() => t.style.opacity = "0", 3000);
+            }
+        };
+
+        const startApp = async () => {
+            try {
+                const app = initializeApp(firebaseConfig);
+                const db = getFirestore(app);
+                const auth = getAuth(app);
+                
+                await setPersistence(auth, browserLocalPersistence);
+                
+                // Kimlik doğrulama işlemi
+                await signInAnonymously(auth);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        await checkLocalAuth(user.uid, db);
+                        setupListeners(db, user);
+                    }
+                });
+            } catch (e) {
+                console.error("Firebase Hatası:", e);
+            }
+
+            setInterval(updateCounters, 1000 * 60 * 5);
+            updateCounters();
+        };
+
+        const setupListeners = (db, user) => {
+            if (!user) return;
+
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), 
+                (snap) => {
+                    allNotes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderNotes();
+                }, 
+                (err) => console.warn(err.message)
+            );
+
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'quotes'), 
+                (snap) => {
+                    if(snap.exists()) {
+                        quotesPool = snap.data().list || [];
+                        const area = document.getElementById('quotes-bulk');
+                        if(area) area.value = quotesPool.join('\n');
+                    } else {
+                        quotesPool = ["Hoş geldin seni çok seviyorum"];
+                    }
+                    displayDailyMessage();
+                },
+                (err) => console.warn(err.message)
+            );
+        };
+
+        async function checkLocalAuth(userId, db) {
+            try {
+                const snap = await getDoc(doc(db, 'artifacts', appId, 'users', userId, 'profile', 'status'));
+                if (snap.exists()) {
+                    currentUser = snap.data().name;
+                }
+                updateUI();
+            } catch (e) { 
+                currentUser = null; 
+                updateUI(); 
+            }
+        }
+
+        window.login = async (name) => {
+            const auth = getAuth();
+            const db = getFirestore();
+            if (!auth.currentUser) return showToast("Bağlantı bekleniyor...");
+            
+            const pass = prompt(`${name} için şifre:`);
+            const correctPass = name === 'Derya' ? '1881' : '1992';
+
+            if (pass === correctPass) {
+                currentUser = name;
+                await setDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'profile', 'status'), { 
+                    name: name, 
+                    lastLogin: Date.now() 
+                });
+                showToast(`Hoş geldin ${name}!`);
+                updateUI();
+            } else {
+                showToast("Şifre hatalı!");
+            }
+        };
+
+        window.logout = async () => {
+            const db = getFirestore();
+            const auth = getAuth();
+            currentUser = null;
+            await setDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'profile', 'status'), { name: null });
+            updateUI();
+        };
+
+        function displayDailyMessage() {
+            const quoteEl = document.getElementById('current-quote');
+            if(!quoteEl) return;
+
+            if (!currentUser) {
+                quoteEl.innerText = "Görmek için giriş yapmalısın sevgilim...";
+                return;
+            }
+
+            const now = new Date();
+            const start = new Date(now.getFullYear(), 0, 0);
+            const diff = now - start;
+            const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+            if (quotesPool.length > 0) {
+                const idx = dayOfYear % quotesPool.length;
+                quoteEl.innerText = `"${quotesPool[idx]}"`;
+                quoteEl.className = "text-rose-800 text-xl md:text-2xl font-bold italic leading-relaxed quote-active-text";
+            }
+        }
+
+        function updateUI() {
+            const modeText = document.getElementById('mode-text');
+            const manageBtn = document.getElementById('manage-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const noteTitle = document.getElementById('notes-title');
+            const noteLabel = document.getElementById('note-target-label');
+
+            if (currentUser) {
+                if(modeText) modeText.innerText = currentUser;
+                if(logoutBtn) logoutBtn.classList.remove('hidden-mode');
+                if(manageBtn) manageBtn.classList.remove('hidden-mode');
+                
+                if (noteLabel) noteLabel.innerText = currentUser === 'İlker' ? "Derya İçin Not Bırak" : "İlker İçin Not Bırak";
+                if (noteTitle) noteTitle.innerText = currentUser === 'İlker' ? "📍 Derya'dan Mesajlar" : "📍 İlker'den Mesajlar";
+            } else {
+                if(modeText) modeText.innerText = "Gözlemci";
+                if(manageBtn) manageBtn.classList.add('hidden-mode');
+                if(logoutBtn) logoutBtn.classList.add('hidden-mode');
+                if(noteTitle) noteTitle.innerText = "📍 Özel Notlar";
+            }
+            renderNotes();
+            displayDailyMessage();
+        }
+
+        function renderNotes() {
+            const body = document.getElementById('notes-body');
+            if(!body) return;
+
+            if (!currentUser) {
+                body.innerHTML = '<tr><td colspan="4" class="p-24 text-center text-rose-200 italic font-bold">İçerik sadece Derya ve İlker içindir.</td></tr>';
+                return;
+            }
+
+            const targetSender = currentUser === 'İlker' ? 'Derya' : 'İlker';
+            const visible = allNotes.filter(n => n.sender === targetSender).sort((a,b) => b.createdAt - a.createdAt);
+
+            if (visible.length === 0) {
+                body.innerHTML = '<tr><td colspan="4" class="p-24 text-center text-rose-300 italic font-bold">Henüz sana bir not gelmemiş sevgilim...</td></tr>';
+                return;
+            }
+
+            body.innerHTML = visible.map(n => `
+                <tr class="hover:bg-rose-50/50 transition-colors text-sm">
+                    <td class="px-8 py-6 text-rose-400 font-bold">${new Date(n.createdAt).toLocaleDateString('tr-TR')}</td>
+                    <td class="px-8 py-6 font-black text-rose-600">${n.sender}</td>
+                    <td class="px-8 py-6 important-note text-lg">${n.text}</td>
+                    <td class="px-8 py-6 text-right">
+                        <button onclick="window.deleteNote('${n.id}')" class="text-rose-200 hover:text-rose-500 font-bold text-xs uppercase">SİL</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.addNote = async () => {
+            if(!currentUser) return;
+            const db = getFirestore();
+            const textEl = document.getElementById('note-text');
+            if(!textEl || !textEl.value.trim()) return;
+            
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar', `n-${Date.now()}`), {
+                    sender: currentUser,
+                    receiver: currentUser === 'İlker' ? 'Derya' : 'İlker',
+                    text: textEl.value.trim(),
+                    createdAt: Date.now()
+                });
+                textEl.value = '';
+                showToast("Mesajın gökyüzüne fırlatıldı! 🚀");
+                if(!document.getElementById('admin-panel').classList.contains('translate-x-full')) window.toggleAdmin();
+            } catch (e) { showToast("Hata!"); }
+        };
+
+        window.saveQuotes = async () => {
+            if(currentUser !== 'İlker') return alert("Sadece İlker güncelleyebilir.");
+            const db = getFirestore();
+            const area = document.getElementById('quotes-bulk');
+            if(!area) return;
+            const list = area.value.split('\n').filter(s => s.trim() !== "");
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'quotes'), { list });
+                showToast("Hikayemiz güncellendi!");
+            } catch (e) { showToast("Hata!"); }
+        };
+
+        window.deleteNote = async (id) => { 
+            if(confirm('Silinsin mi?')) {
+                try {
+                    await deleteDoc(doc(getFirestore(), 'artifacts', appId, 'public', 'data', 'ozel_notlar', id));
+                    showToast("Not silindi.");
+                } catch (e) { showToast("Hata!"); }
+            }
+        };
+
+        function updateCounters() {
+            const now = new Date();
+            const dM = Math.floor((now - marriageDate) / (1000 * 60 * 60 * 24));
+            const dT = Math.floor((now - meetingDate) / (1000 * 60 * 60 * 24));
+            const mEl = document.getElementById('marriage-counter');
+            const mtEl = document.getElementById('meeting-counter');
+            if(mEl) mEl.innerText = dM.toLocaleString();
+            if(mtEl) mtEl.innerText = dT.toLocaleString();
+        }
+
+        window.toggleAdmin = () => document.getElementById('admin-panel').classList.toggle('translate-x-full');
+        window.switchTab = (tab) => {
+            const tNotes = document.getElementById('tab-notes');
+            const tQuotes = document.getElementById('tab-quotes');
+            const sNotes = document.getElementById('sidebar-notes-content');
+            const sQuotes = document.getElementById('sidebar-quotes-content');
+            
+            if(tNotes) tNotes.className = `tab-btn flex-1 text-[10px] font-bold py-2 rounded-xl ${tab === 'notes' ? 'active' : 'inactive'}`;
+            if(tQuotes) tQuotes.className = `tab-btn flex-1 text-[10px] font-bold py-2 rounded-xl ${tab === 'quotes' ? 'active' : 'inactive'}`;
+            if(sNotes) sNotes.className = tab === 'notes' ? 'space-y-4' : 'hidden';
+            if(sQuotes) sQuotes.className = tab === 'quotes' ? 'space-y-4' : 'hidden';
+        };
+
+        startApp();
+    </script>
+</body>
+</html>
