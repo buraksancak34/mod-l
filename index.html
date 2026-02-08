@@ -322,7 +322,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         // Firebase Config
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -365,10 +365,19 @@
                 const auth = getAuth(app);
                 
                 await setPersistence(auth, browserLocalPersistence);
-                await signInAnonymously(auth);
+                
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } catch(e) { await signInAnonymously(auth); }
+                } else {
+                    await signInAnonymously(auth);
+                }
 
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
+                        // Burada local auth kontrolünü atlıyoruz, sadece firestore listener'ları başlatıyoruz
+                        // Kullanıcı oturumu local storage ile yönetiliyor
                         setupListeners(db, user);
                     }
                 });
@@ -385,38 +394,42 @@
             if (!user) return;
 
             // Notlar
-            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), orderBy('createdAt', 'desc')), 
-                (snap) => {
-                    allNotes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderNotes();
-                }, (e) => console.warn(e)
-            );
+            try {
+                onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), orderBy('createdAt', 'desc')), 
+                    (snap) => {
+                        allNotes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        renderNotes();
+                    }, (e) => console.warn(e)
+                );
 
-            // Sözler
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler'), 
-                (snap) => {
-                    quotesPool = {};
-                    snap.docs.forEach(doc => { quotesPool[doc.id] = doc.data().text; });
-                    displayDailyMessage();
-                    if(currentUser === 'İlker') renderQuotesList();
-                }
-            );
+                // Sözler
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler'), 
+                    (snap) => {
+                        quotesPool = {};
+                        snap.docs.forEach(doc => { quotesPool[doc.id] = doc.data().text; });
+                        displayDailyMessage();
+                        if(currentUser === 'İlker') renderQuotesList();
+                    }
+                );
 
-            // Fotoğraflı Anılar
-            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'ani_kosesi'), orderBy('tarih', 'desc')),
-                (snap) => {
-                    allMemories = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderMemories();
-                }
-            );
+                // Fotoğraflı Anılar
+                onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'ani_kosesi'), orderBy('tarih', 'desc')),
+                    (snap) => {
+                        allMemories = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        renderMemories();
+                    }
+                );
 
-            // Anı Defteri (Milestones)
-            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'milestones'), orderBy('date', 'desc')), 
-                (snap) => {
-                    milestones = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderMilestones();
-                }
-            );
+                // Anı Defteri (Milestones)
+                onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'milestones'), orderBy('date', 'desc')), 
+                    (snap) => {
+                        milestones = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        renderMilestones();
+                    }
+                );
+            } catch (e) {
+                console.warn("Firestore dinleyicileri başlatılamadı:", e);
+            }
         };
 
         window.login = (name) => {
@@ -501,6 +514,7 @@
                 body.innerHTML = '<p class="p-24 text-center text-rose-300 italic font-bold">Mesajları görmek için giriş yapın...</p>';
                 return;
             }
+
             if (allNotes.length === 0) {
                 body.innerHTML = `<p class="p-24 text-center text-rose-300 italic font-bold">Henüz hiç mesaj yok...</p>`;
                 return;
@@ -565,7 +579,36 @@
                 list.innerHTML = '<p class="text-center text-xs text-rose-300 italic py-4">Henüz bir anı eklenmemiş.</p>';
                 return;
             }
-            // Anı köşesi render mantığı aynı...
+
+            const memoriesByYear = allMemories.reduce((acc, mem) => {
+                const year = new Date(mem.tarih).getFullYear();
+                if(!acc[year]) acc[year] = [];
+                acc[year].push(mem);
+                return acc;
+            }, {});
+
+            const sortedYears = Object.keys(memoriesByYear).sort((a,b) => b - a);
+
+            list.innerHTML = sortedYears.map(year => `
+                <details class="group border border-rose-100 rounded-xl overflow-hidden mb-2">
+                    <summary class="flex justify-between items-center p-3 bg-rose-50 cursor-pointer font-bold text-rose-700 text-xs uppercase">
+                        <span>${year} Yılı (${memoriesByYear[year].length})</span>
+                        <span class="transition group-open:rotate-180">▼</span>
+                    </summary>
+                    <div class="p-3 space-y-4 bg-white">
+                        ${memoriesByYear[year].map(mem => `
+                            <div class="border-b border-rose-50 pb-3 last:border-0">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-[10px] font-bold text-rose-400">${new Date(mem.tarih).toLocaleDateString('tr-TR')} - ${mem.kimden}</span>
+                                    <button onclick="window.deleteMemory('${mem.id}')" class="text-[10px] text-rose-300 hover:text-rose-600 font-bold">SİL</button>
+                                </div>
+                                ${mem.foto_url ? `<img src="${mem.foto_url}" class="w-full h-32 object-cover rounded-lg mb-2 shadow-sm">` : ''}
+                                <p class="text-xs text-slate-700 italic leading-relaxed">${mem.aciklama}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </details>
+            `).join('');
         }
 
         // --- ACTIONS ---
@@ -586,14 +629,19 @@
             if(!currentUser) return;
             const textEl = document.getElementById('note-text');
             if(!textEl || !textEl.value.trim()) return;
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar', `n-${Date.now()}`), {
-                sender: currentUser,
-                receiver: currentUser === 'İlker' ? 'Derya' : 'İlker',
-                text: textEl.value.trim(),
-                createdAt: Date.now()
-            });
-            textEl.value = '';
-            showToast("Mesajın iletildi! 💌");
+            
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar', `n-${Date.now()}`), {
+                    sender: currentUser,
+                    receiver: currentUser === 'İlker' ? 'Derya' : 'İlker',
+                    text: textEl.value.trim(),
+                    createdAt: Date.now()
+                });
+                textEl.value = '';
+                showToast("Mesajın iletildi! 💌");
+            } catch (e) {
+                showToast("Mesaj iletilemedi.");
+            }
         };
 
         window.deleteNote = async (id) => { if(confirm('Silinsin mi?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar', id)); };
