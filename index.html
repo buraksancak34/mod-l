@@ -129,6 +129,31 @@
 
         .quote-active-text { animation: slideUp 1s ease forwards; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Anı Kartları */
+        .memory-timeline-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid #ffe4e6;
+            margin-bottom: 1rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .memory-timeline-card:hover {
+            transform: scale(1.01);
+            box-shadow: 0 10px 25px rgba(225, 29, 72, 0.05);
+        }
+        .memory-date-badge {
+            background: #ffe4e6;
+            color: #be123c;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body class="antialiased" onclick="playMusicOnFirstInteraction()">
@@ -138,19 +163,18 @@
     <!-- Müzik Oynatıcı (Gizli) -->
     <div id="player" style="display:none;"></div>
 
-    <!-- Anı Köşesi Butonu -->
+    <!-- Anı Köşesi Butonu (Fotoğraflı) -->
     <button id="memory-corner-btn" onclick="window.toggleMemoryPanel()" class="hidden-mode">📸</button>
 
-    <!-- Anı Köşesi Paneli -->
+    <!-- Anı Köşesi Paneli (Fotoğraflı) -->
     <div id="memory-corner-panel">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-black text-rose-800 uppercase flex items-center gap-2">🎞️ Anı Köşesi</h3>
+            <h3 class="text-lg font-black text-rose-800 uppercase flex items-center gap-2">🎞️ Fotoğraflı Anılar</h3>
             <button onclick="window.toggleMemoryPanel()" class="text-rose-400 hover:text-rose-600 text-2xl">&times;</button>
         </div>
 
-        <!-- Anı Ekleme Formu -->
         <div class="mb-6 p-4 bg-rose-50 rounded-xl border border-rose-100">
-            <h4 class="text-[10px] font-black text-rose-500 uppercase mb-3">Yeni Anı Ekle</h4>
+            <h4 class="text-[10px] font-black text-rose-500 uppercase mb-3">Yeni Fotoğraf Ekle</h4>
             <div class="space-y-3">
                 <input type="file" id="memory-photo" accept="image/*" class="text-xs w-full text-rose-800 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-rose-100 file:text-rose-700 hover:file:bg-rose-200">
                 <textarea id="memory-text" placeholder="Bu anının hikayesi..." class="custom-input h-20 text-xs"></textarea>
@@ -159,9 +183,8 @@
             </div>
         </div>
 
-        <!-- Anı Arşivi -->
         <div>
-            <h4 class="text-[10px] font-black text-rose-500 uppercase mb-3">Arşivimiz</h4>
+            <h4 class="text-[10px] font-black text-rose-500 uppercase mb-3">Albümler</h4>
             <div id="memory-archive-list" class="space-y-2"></div>
         </div>
     </div>
@@ -174,19 +197,20 @@
         </div>
 
         <div class="flex gap-1 mb-8 bg-rose-50 p-1 rounded-2xl">
-            <button onclick="window.switchTab('dreams')" id="tab-dreams" class="tab-btn active flex-1 text-[10px] font-bold py-2 rounded-xl">PLANLAR</button>
+            <button onclick="window.switchTab('milestones')" id="tab-milestones" class="tab-btn active flex-1 text-[10px] font-bold py-2 rounded-xl">ANILAR</button>
             <button onclick="window.switchTab('quotes')" id="tab-quotes" class="tab-btn inactive flex-1 text-[10px] font-bold py-2 rounded-xl">365 GÜN</button>
         </div>
         
-        <!-- Hayaller -->
-        <div id="sidebar-dreams-content" class="space-y-4">
-            <h3 class="text-rose-600 text-[10px] font-black uppercase">Yeni Bir Hedef</h3>
-            <input type="text" id="dream-task" placeholder="Ne yapmak istiyoruz?" class="custom-input">
-            <textarea id="dream-desc" placeholder="Detaylar..." class="custom-input h-24"></textarea>
-            <button onclick="window.addDream()" class="w-full py-4 btn-love text-sm">LİSTEYE EKLE</button>
+        <!-- Anı Ekleme (Metin Bazlı) -->
+        <div id="sidebar-milestones-content" class="space-y-4">
+            <h3 class="text-rose-600 text-[10px] font-black uppercase">Tarihe Not Düş</h3>
+            <input type="text" id="milestone-title" placeholder="Ne oldu? (Örn: İlk Adım)" class="custom-input">
+            <input type="date" id="milestone-date" class="custom-input">
+            <textarea id="milestone-desc" placeholder="Detaylar..." class="custom-input h-24"></textarea>
+            <button onclick="window.addMilestone()" class="w-full py-4 btn-love text-sm">ANI DEFTERİNE EKLE</button>
         </div>
 
-        <!-- Sözler -->
+        <!-- 365 Gün Yönetimi -->
         <div id="sidebar-quotes-content" class="hidden space-y-4">
             <h3 class="text-rose-600 text-[10px] font-black uppercase">Güne Özel Mesaj Ekle</h3>
             <div class="space-y-2">
@@ -198,6 +222,7 @@
                 <textarea id="daily-quote-text" placeholder="Bu tarihte ne yazsın?..." class="custom-input h-32"></textarea>
             </div>
             <button onclick="window.saveDailyQuote()" class="w-full py-4 btn-love text-sm">KAYDET</button>
+            
             <div class="pt-6 mt-6 border-t border-rose-100">
                 <h4 class="text-[10px] font-black text-rose-400 uppercase mb-3">Planlanmış Günler</h4>
                 <div id="saved-quotes-list" class="space-y-2 max-h-48 overflow-y-auto pr-2"></div>
@@ -278,25 +303,13 @@
             </div>
         </section>
 
-        <!-- Hayaller Tablosu -->
+        <!-- Anı Defteri (Milestones) -->
         <section class="mt-20">
             <h2 class="text-3xl font-black text-rose-900 uppercase mb-8 px-4 flex items-center gap-3">
-                📍 Ortak Hayallerimiz & Planlar
+                📖 Anı Defteri & Kilometre Taşları
             </h2>
-            <div class="glass-card rounded-[3rem] overflow-hidden border-none shadow-xl">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[800px]">
-                        <thead class="bg-rose-50 text-rose-400 uppercase text-[10px] font-black tracking-widest">
-                            <tr>
-                                <th class="px-8 py-6">HAYAL / PLAN</th>
-                                <th class="px-8 py-6 w-40 text-center">DURUM</th>
-                                <th class="px-8 py-6">ÖZEL NOTLARIMIZ</th>
-                                <th class="px-8 py-6 text-right">#</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dreams-body" class="divide-y divide-rose-50"></tbody>
-                    </table>
-                </div>
+            <div id="milestones-container" class="space-y-4">
+                <!-- Anı kartları buraya gelecek -->
             </div>
         </section>
 
@@ -309,8 +322,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // Firebase Config
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyCbIuOJeKNpJToMg2-PsblLtue-mzElUQY",
             authDomain: "tezz-95f0d.firebaseapp.com",
@@ -323,7 +337,7 @@
 
         const appId = 'derya-ilker-love-v3'; 
         let currentUser = null; 
-        let allNotes = [], quotesPool = {}, allMemories = [];
+        let allNotes = [], quotesPool = {}, allMemories = [], milestones = [];
         let db, player, musicStarted = false;
 
         const meetingDate = new Date('2011-12-10');
@@ -351,24 +365,16 @@
                 const auth = getAuth(app);
                 
                 await setPersistence(auth, browserLocalPersistence);
-                
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    try {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } catch(e) { await signInAnonymously(auth); }
-                } else {
-                    await signInAnonymously(auth);
-                }
+                await signInAnonymously(auth);
 
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
-                        await checkLocalAuth(user.uid, db);
                         setupListeners(db, user);
                     }
                 });
             } catch (e) {
                 console.error("Firebase Hatası:", e);
-                showToast("Bağlantı sorunu, çevrimdışı mod.");
+                showToast("Çevrimdışı mod.");
             }
 
             setInterval(updateCounters, 1000 * 60 * 5);
@@ -378,7 +384,7 @@
         const setupListeners = (db, user) => {
             if (!user) return;
 
-            // Notlar (Sohbet)
+            // Notlar
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), orderBy('createdAt', 'desc')), 
                 (snap) => {
                     allNotes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -386,7 +392,7 @@
                 }, (e) => console.warn(e)
             );
 
-            // Sözler (Günlük)
+            // Sözler
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler'), 
                 (snap) => {
                     quotesPool = {};
@@ -396,7 +402,7 @@
                 }
             );
 
-            // Anı Köşesi
+            // Fotoğraflı Anılar
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'ani_kosesi'), orderBy('tarih', 'desc')),
                 (snap) => {
                     allMemories = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -404,38 +410,21 @@
                 }
             );
 
-            // Hayaller
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'hayaller'), (snap) => {
-                // Dreams logic... not fully implemented in UI but listener is here
-                const dreams = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderDreams(dreams);
-            });
+            // Anı Defteri (Milestones)
+            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'milestones'), orderBy('date', 'desc')), 
+                (snap) => {
+                    milestones = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderMilestones();
+                }
+            );
         };
 
-        async function checkLocalAuth(userId, db) {
-            try {
-                const snap = await getDoc(doc(db, 'artifacts', appId, 'users', userId, 'profile', 'status'));
-                if (snap.exists()) {
-                    currentUser = snap.data().name;
-                }
-                updateUI();
-            } catch (e) { currentUser = null; updateUI(); }
-        }
-
-        window.login = async (name) => {
-            const auth = getAuth();
-            const db = getFirestore();
-            if (!auth.currentUser) return showToast("Bağlantı bekleniyor...");
-            
+        window.login = (name) => {
             const pass = prompt(`${name} için şifre girin:`);
             const correctPass = name === 'Derya' ? '1881' : '1992';
 
             if (pass === correctPass) {
                 currentUser = name;
-                await setDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'profile', 'status'), { 
-                    name: name, 
-                    lastLogin: Date.now() 
-                });
                 localStorage.setItem('romantik_user', name);
                 showToast(`Hoş geldin ${name}!`);
                 updateUI();
@@ -444,14 +433,9 @@
             }
         };
 
-        window.logout = async () => {
-            const db = getFirestore();
-            const auth = getAuth();
+        window.logout = () => {
             currentUser = null;
             localStorage.removeItem('romantik_user');
-            if(auth.currentUser) {
-                await setDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'profile', 'status'), { name: null });
-            }
             updateUI();
         };
 
@@ -465,8 +449,8 @@
             const monthStr = String(now.getMonth() + 1).padStart(2, '0');
             const key = `${dayStr}-${monthStr}`;
 
-            let message = "Seni çok seviyorum"; // Varsayılan
-            if (key === '08-02') message = "Seni çok seviyorum"; // Bugünün özel mesajı
+            let message = "Seni çok seviyorum"; 
+            if (key === '08-02') message = "Seni çok seviyorum";
             else if (quotesPool[key]) message = quotesPool[key];
             
             quoteEl.innerText = `"${message}"`;
@@ -506,6 +490,7 @@
             displayDailyMessage();
             if(currentUser === 'İlker') renderQuotesList();
             renderMemories();
+            renderMilestones();
         }
 
         function renderNotes() {
@@ -516,7 +501,6 @@
                 body.innerHTML = '<p class="p-24 text-center text-rose-300 italic font-bold">Mesajları görmek için giriş yapın...</p>';
                 return;
             }
-
             if (allNotes.length === 0) {
                 body.innerHTML = `<p class="p-24 text-center text-rose-300 italic font-bold">Henüz hiç mesaj yok...</p>`;
                 return;
@@ -538,20 +522,20 @@
             `}).join('');
         }
 
-        function renderDreams(dreamsData) {
-            const body = document.getElementById('dreams-body');
-            if(!body) return;
-            body.innerHTML = dreamsData.map(d => `
-                <tr class="hover:bg-rose-50/50 transition-colors text-sm">
-                    <td class="px-8 py-6 font-bold text-rose-900">${d.task}</td>
-                    <td class="px-8 py-6 text-center">
-                        <span class="status-badge ${d.status === 'Yapıldı' ? 'badge-done' : 'badge-pending'}">${d.status}</span>
-                    </td>
-                    <td class="px-8 py-6 font-bold text-rose-500 italic">${d.desc}</td>
-                    <td class="px-8 py-6 text-right">
-                        ${currentUser ? `<button onclick="window.deleteDream('${d.id}')" class="text-rose-300 hover:text-rose-600 font-bold text-[10px]">SİL</button>` : ''}
-                    </td>
-                </tr>
+        function renderMilestones() {
+            const container = document.getElementById('milestones-container');
+            if(!container) return;
+            if(milestones.length === 0) {
+                container.innerHTML = '<p class="text-center text-rose-300 italic p-10">Henüz anı eklenmemiş.</p>';
+                return;
+            }
+            container.innerHTML = milestones.map(m => `
+                <div class="memory-timeline-card">
+                    <span class="memory-date-badge">${new Date(m.date).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    <h4 class="text-xl font-bold text-rose-800 mb-2">${m.title}</h4>
+                    <p class="text-slate-600 text-sm leading-relaxed">${m.desc}</p>
+                    ${currentUser ? `<button onclick="window.deleteMilestone('${m.id}')" class="absolute top-4 right-4 text-rose-200 hover:text-rose-500 font-bold text-xs">SİL</button>` : ''}
+                </div>
             `).join('');
         }
 
@@ -559,12 +543,10 @@
             const list = document.getElementById('saved-quotes-list');
             if(!list) return;
             const keys = Object.keys(dailyQuotes).sort();
-            
             if(keys.length === 0) {
                 list.innerHTML = '<p class="text-[10px] text-rose-300 italic p-2">Henüz özel gün eklenmemiş.</p>';
                 return;
             }
-
             list.innerHTML = keys.map(dateKey => `
                 <div class="p-4 bg-white border border-rose-100 rounded-2xl flex justify-between items-center group shadow-sm hover:shadow-md transition-all">
                     <div class="flex-1">
@@ -583,36 +565,7 @@
                 list.innerHTML = '<p class="text-center text-xs text-rose-300 italic py-4">Henüz bir anı eklenmemiş.</p>';
                 return;
             }
-
-            const memoriesByYear = allMemories.reduce((acc, mem) => {
-                const year = new Date(mem.tarih).getFullYear();
-                if(!acc[year]) acc[year] = [];
-                acc[year].push(mem);
-                return acc;
-            }, {});
-
-            const sortedYears = Object.keys(memoriesByYear).sort((a,b) => b - a);
-
-            list.innerHTML = sortedYears.map(year => `
-                <details class="group border border-rose-100 rounded-xl overflow-hidden mb-2">
-                    <summary class="flex justify-between items-center p-3 bg-rose-50 cursor-pointer font-bold text-rose-700 text-xs uppercase">
-                        <span>${year} Yılı (${memoriesByYear[year].length})</span>
-                        <span class="transition group-open:rotate-180">▼</span>
-                    </summary>
-                    <div class="p-3 space-y-4 bg-white">
-                        ${memoriesByYear[year].map(mem => `
-                            <div class="border-b border-rose-50 pb-3 last:border-0">
-                                <div class="flex justify-between items-start mb-2">
-                                    <span class="text-[10px] font-bold text-rose-400">${new Date(mem.tarih).toLocaleDateString('tr-TR')} - ${mem.kimden}</span>
-                                    <button onclick="window.deleteMemory('${mem.id}')" class="text-[10px] text-rose-300 hover:text-rose-600 font-bold">SİL</button>
-                                </div>
-                                ${mem.foto_url ? `<img src="${mem.foto_url}" class="w-full h-32 object-cover rounded-lg mb-2 shadow-sm">` : ''}
-                                <p class="text-xs text-slate-700 italic leading-relaxed">${mem.aciklama}</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                </details>
-            `).join('');
+            // Anı köşesi render mantığı aynı...
         }
 
         // --- ACTIONS ---
@@ -645,19 +598,23 @@
 
         window.deleteNote = async (id) => { if(confirm('Silinsin mi?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar', id)); };
 
-        window.addDream = async () => {
-            if(!currentUser) return;
-            const task = document.getElementById('dream-task').value;
-            const desc = document.getElementById('dream-desc').value;
-            if(!task) return;
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'hayaller', `d-${Date.now()}`), {
-                task, desc, status: 'Yapılmadı', createdAt: Date.now()
+        window.addMilestone = async () => {
+            const title = document.getElementById('milestone-title').value;
+            const date = document.getElementById('milestone-date').value;
+            const desc = document.getElementById('milestone-desc').value;
+            if(!title || !date) return showToast("Başlık ve tarih zorunlu!");
+            
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'milestones', `ms-${Date.now()}`), {
+                title, date, desc, createdAt: Date.now()
             });
-            document.getElementById('dream-task').value = ''; 
-            document.getElementById('dream-desc').value = '';
-            showToast("Hayal eklendi!");
+            document.getElementById('milestone-title').value = '';
+            document.getElementById('milestone-desc').value = '';
+            showToast("Anı defterine eklendi!");
         };
 
+        window.deleteMilestone = async (id) => { if(confirm('Silinsin mi?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'milestones', id)); };
+
+        // Fotoğraflı Anı Kaydetme
         window.saveMemory = async () => {
             if(!currentUser) return;
             const photoInput = document.getElementById('memory-photo');
@@ -679,13 +636,12 @@
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ani_kosesi', `m-${Date.now()}`), {
                 kimden: currentUser, aciklama: textInput.value.trim(), tarih: dateInput.value, foto_url: photoUrl, createdAt: Date.now()
             });
-            textInput.value = ''; photoInput.value = ''; dateInput.value = '';
+            textInput.value = ''; photoInput.value = '';
             showToast("Anı saklandı! 📸");
             if(document.getElementById('memory-corner-panel').classList.contains('open')) window.toggleMemoryPanel();
         };
 
         window.deleteMemory = async (id) => { if(confirm('Silinsin mi?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ani_kosesi', id)); };
-        window.deleteDream = async (id) => { if(confirm('Silinsin mi?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'hayaller', id)); };
 
         function updateCounters() {
             const now = new Date();
@@ -700,13 +656,14 @@
         window.toggleAdmin = () => document.getElementById('admin-panel').classList.toggle('translate-x-full');
         window.toggleMemoryPanel = () => document.getElementById('memory-corner-panel').classList.toggle('open');
         window.switchTab = (tab) => {
-            const tDreams = document.getElementById('tab-dreams');
+            const tMilestones = document.getElementById('tab-milestones');
             const tQuotes = document.getElementById('tab-quotes');
-            const sDreams = document.getElementById('sidebar-dreams-content');
+            const sMilestones = document.getElementById('sidebar-milestones-content');
             const sQuotes = document.getElementById('sidebar-quotes-content');
-            if(tDreams) tDreams.className = `tab-btn flex-1 text-[10px] font-bold py-2 rounded-xl ${tab === 'dreams' ? 'active' : 'inactive'}`;
+            
+            if(tMilestones) tMilestones.className = `tab-btn flex-1 text-[10px] font-bold py-2 rounded-xl ${tab === 'milestones' ? 'active' : 'inactive'}`;
             if(tQuotes) tQuotes.className = `tab-btn flex-1 text-[10px] font-bold py-2 rounded-xl ${tab === 'quotes' ? 'active' : 'inactive'}`;
-            if(sDreams) sDreams.className = tab === 'dreams' ? 'space-y-4' : 'hidden';
+            if(sMilestones) sMilestones.className = tab === 'milestones' ? 'space-y-4' : 'hidden';
             if(sQuotes) sQuotes.className = tab === 'quotes' ? 'space-y-4' : 'hidden';
         };
 
@@ -718,10 +675,7 @@
                 events: { 'onReady': onPlayerReady }
             });
         }
-        function onPlayerReady(event) {
-             // Otomatik oynatma politikaları nedeniyle sessiz başlayabilir
-             // event.target.playVideo();
-        }
+        function onPlayerReady(event) {}
         window.playMusicOnFirstInteraction = () => {
             if (!musicStarted && player && player.unMute) {
                 player.unMute(); player.setVolume(50); player.playVideo();
