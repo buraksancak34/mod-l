@@ -63,7 +63,7 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .chat-bubble.sent {
-            background: #e11d48; /* Kırmızı tonu */
+            background: #e11d48;
             color: white;
             align-self: flex-end;
             border-bottom-right-radius: 4px;
@@ -110,22 +110,31 @@
             border-radius: 1.5rem;
             overflow: hidden;
             border: 1px solid #ffe4e6;
-            transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
         }
         @media (min-width: 768px) {
             .memory-card-wide { flex-direction: row; height: 300px; }
-            .memory-img-container { width: 45%; height: 100%; }
-            .memory-content-container { width: 55%; }
+            .memory-img-col { width: 40%; height: 100%; position: relative; }
+            .memory-content-col { width: 60%; padding: 2rem; display: flex; flex-direction: column; justify-content: center; }
         }
-        .memory-img-container img { width: 100%; height: 100%; object-fit: cover; }
-        .memory-content-container { padding: 2rem; display: flex; flex-direction: column; justify-content: center; position: relative; }
+        @media (max-width: 767px) {
+            .memory-img-col { width: 100%; height: 250px; }
+            .memory-content-col { padding: 1.5rem; }
+        }
+        
+        .memory-img-col img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        
         .memory-date-badge {
-            background: #ffe4e6; color: #be123c;
-            padding: 4px 12px; border-radius: 20px;
+            background: #fff1f2; color: #be123c;
+            padding: 6px 16px; border-radius: 20px;
             font-size: 11px; font-weight: 800;
             display: inline-block; margin-bottom: 12px; width: fit-content;
+            border: 1px solid #fecdd3;
         }
 
         /* Müzik Player */
@@ -134,12 +143,20 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-top: 1px solid #ffe4e6;
-            padding: 10px 20px;
+            padding: 15px 24px;
             display: flex; justify-content: space-between; align-items: center;
-            z-index: 5000; box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
-            transform: translateY(100%); transition: transform 0.3s;
+            z-index: 5000; box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
         }
-        #music-player-bar.active { transform: translateY(0); }
+        
+        /* Liste Stili */
+        .quote-list-item {
+            padding: 12px;
+            border-bottom: 1px solid #ffe4e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .quote-list-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body class="antialiased pb-24" onclick="playMusicOnFirstInteraction()">
@@ -152,16 +169,16 @@
     <!-- Müzik Kontrol Barı -->
     <div id="music-player-bar">
         <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 animate-spin-slow">🎵</div>
+            <div class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 animate-spin-slow shadow-sm">🎵</div>
             <div>
-                <p id="music-title" class="text-xs font-bold text-rose-800">Müzik Yükleniyor...</p>
-                <p class="text-[10px] text-rose-400">Bizim Şarkılarımız</p>
+                <p id="music-title" class="text-xs font-bold text-rose-900">Müzik Yükleniyor...</p>
+                <p class="text-[10px] text-rose-400 font-medium">İlker & Derya Playlist</p>
             </div>
         </div>
-        <div class="flex gap-4">
-            <button onclick="window.prevSong()" class="text-rose-400 hover:text-rose-600">⏮</button>
-            <button onclick="window.togglePlay()" id="play-btn" class="text-rose-600 hover:text-rose-800 font-bold">▶</button>
-            <button onclick="window.nextSong()" class="text-rose-400 hover:text-rose-600">⏭</button>
+        <div class="flex gap-6 items-center">
+            <button onclick="window.prevSong()" class="text-rose-300 hover:text-rose-600 text-xl transition-colors">⏮</button>
+            <button onclick="window.togglePlay()" id="play-btn" class="w-10 h-10 bg-rose-500 rounded-full text-white flex items-center justify-center shadow-lg hover:bg-rose-600 transition-all">▶</button>
+            <button onclick="window.nextSong()" class="text-rose-300 hover:text-rose-600 text-xl transition-colors">⏭</button>
         </div>
     </div>
 
@@ -172,22 +189,27 @@
             <button onclick="window.toggleAdmin()" class="text-rose-300 hover:text-rose-600 text-3xl">&times;</button>
         </div>
 
-        <div id="sidebar-quotes-content" class="space-y-4">
-            <h3 class="text-rose-600 text-[10px] font-black uppercase">Güne Özel Mesaj Ekle</h3>
-            <div class="space-y-2">
-                <label class="text-[10px] font-bold text-rose-400">TARİH SEÇ</label>
-                <input type="date" id="quote-date" class="custom-input">
+        <div id="sidebar-quotes-content" class="space-y-6">
+            <div>
+                <h3 class="text-rose-600 text-[11px] font-black uppercase mb-3 tracking-widest">Güne Özel Mesaj Ekle</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-[10px] font-bold text-rose-400 block mb-1">TARİH SEÇ</label>
+                        <input type="date" id="quote-date" class="custom-input">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-rose-400 block mb-1">MESAJINIZ</label>
+                        <textarea id="daily-quote-text" placeholder="Bu tarihte ne yazsın?..." class="custom-input h-32"></textarea>
+                    </div>
+                    <button onclick="window.saveDailyQuote()" class="w-full py-4 btn-love text-xs font-bold uppercase shadow-lg">KAYDET</button>
+                </div>
             </div>
-            <div class="space-y-2">
-                <label class="text-[10px] font-bold text-rose-400">MESAJINIZ</label>
-                <textarea id="daily-quote-text" placeholder="Bu tarihte ne yazsın?..." class="custom-input h-32"></textarea>
-            </div>
-            <button onclick="window.saveDailyQuote()" class="w-full py-4 btn-love text-sm">KAYDET</button>
             
-            <div class="pt-6 mt-6 border-t border-rose-100">
-                <h4 class="text-[10px] font-black text-rose-400 uppercase mb-3">Planlanmış Günler</h4>
-                <div id="saved-quotes-list" class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scroll">
+            <div class="pt-6 border-t border-rose-100">
+                <h4 class="text-[10px] font-black text-rose-400 uppercase mb-3 tracking-widest">Planlanmış Günler</h4>
+                <div id="saved-quotes-list" class="bg-white rounded-xl border border-rose-100 max-h-64 overflow-y-auto custom-scroll">
                     <!-- Kayıtlı sözler buraya gelecek -->
+                    <p class="text-center text-[10px] text-rose-300 p-4 italic">Yükleniyor...</p>
                 </div>
             </div>
         </div>
@@ -206,21 +228,22 @@
                             <span id="mode-text">Gözlemci</span>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="window.login('Derya')" id="btn-login-derya" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">Derya</button>
+                            <button onclick="window.login('Derya')" id="btn-login-derya" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer hover:text-rose-700">Derya</button>
                             <span class="text-rose-200">|</span>
-                            <button onclick="window.login('İlker')" id="btn-login-ilker" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">İlker</button>
+                            <button onclick="window.login('İlker')" id="btn-login-ilker" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer hover:text-rose-700">İlker</button>
                         </div>
-                        <button onclick="window.toggleAdmin()" id="manage-btn" class="hidden-mode btn-love px-8 py-2.5 text-[10px] uppercase shadow-lg ml-4">🛠️ Söz Yönetimi</button>
-                        <button onclick="window.logout()" id="logout-btn" class="hidden-mode text-[10px] font-black uppercase text-rose-300 ml-4 cursor-pointer">Çıkış</button>
+                        <button onclick="window.toggleAdmin()" id="manage-btn" class="hidden-mode btn-love px-6 py-2 text-[10px] uppercase shadow-lg ml-4">🛠️ Söz Yönetimi</button>
+                        <button onclick="window.logout()" id="logout-btn" class="hidden-mode text-[10px] font-black uppercase text-rose-300 ml-4 cursor-pointer hover:text-rose-500">Çıkış</button>
                     </div>
 
                     <!-- Günlük Mesaj Alanı -->
-                    <div id="daily-quote-area" class="max-w-2xl w-full glass-card p-10 rounded-[3rem] border-rose-200">
-                        <div id="quote-display-box" class="text-center w-full">
-                            <h4 class="text-[9px] font-black text-rose-300 uppercase tracking-[4px] mb-4">Günün Kalp Atışı</h4>
-                            <p id="current-quote" class="text-rose-800 text-xl md:text-2xl font-bold italic leading-relaxed">Giriş yapıldığında yüklenecek...</p>
-                            <div class="h-1 w-20 bg-rose-200 mx-auto mt-6 rounded-full"></div>
+                    <div id="daily-quote-area" class="max-w-2xl w-full glass-card p-10 rounded-[3rem] border-rose-200 relative overflow-hidden group">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-200 via-pink-400 to-rose-200"></div>
+                        <div id="quote-display-box" class="text-center w-full relative z-10">
+                            <h4 class="text-[10px] font-black text-rose-300 uppercase tracking-[6px] mb-6">GÜNÜN KALP ATIŞI</h4>
+                            <p id="current-quote" class="text-rose-800 text-2xl md:text-3xl font-bold italic leading-relaxed font-serif">Giriş yapıldığında yüklenecek...</p>
                         </div>
+                         <div class="absolute -bottom-12 -right-12 text-rose-50 text-9xl opacity-60 rotate-12 pointer-events-none group-hover:scale-110 transition-transform duration-700">♥</div>
                     </div>
                 </div>
             </div>
@@ -247,7 +270,7 @@
         <!-- Mesaj Kutusu (Chat Görünümü) -->
         <section id="notes-section" class="mt-20">
             <div class="flex justify-between items-end mb-8 px-4">
-                <h2 id="notes-title" class="text-3xl font-black text-rose-900 uppercase">💌 Mesaj Kutusu</h2>
+                <h2 id="notes-title" class="text-3xl font-black text-rose-900 uppercase tracking-tight">💌 Mesaj Kutusu</h2>
             </div>
 
             <div class="glass-card rounded-[3rem] p-8 border-rose-200 shadow-xl min-h-[400px] flex flex-col">
@@ -262,14 +285,14 @@
         </section>
 
         <!-- Anı Defteri (Geniş Kartlar) -->
-        <section class="mt-20 mb-20">
-            <h2 class="text-3xl font-black text-rose-900 uppercase mb-8 px-4 flex items-center gap-3">
-                📖 Anı Defteri & Kilometre Taşları
-            </h2>
+        <section class="mt-24 mb-32">
+            <div class="flex justify-between items-end mb-10 px-4">
+                <h2 class="text-3xl font-black text-rose-900 uppercase tracking-tight">📖 Anı Defteri</h2>
+            </div>
             
             <!-- Anı Ekleme Alanı (Ana Sayfa) -->
-            <div id="memory-add-area-main" class="hidden mb-12 glass-card p-8 rounded-[2.5rem] border border-rose-100">
-                <h4 class="text-xs font-black text-rose-500 uppercase mb-6">Yeni Bir Anı Kaydet</h4>
+            <div id="memory-add-area-main" class="hidden mb-12 glass-card p-8 rounded-[2.5rem] border border-rose-100 shadow-lg">
+                <h4 class="text-xs font-black text-rose-500 uppercase mb-6 flex items-center gap-2"><span class="text-lg">✨</span> Yeni Bir Anı Kaydet</h4>
                 <div class="flex flex-col md:flex-row gap-6 items-start">
                     <div class="w-full md:w-1/3 flex flex-col gap-2">
                         <label class="text-[10px] font-bold text-rose-400 uppercase ml-2">Fotoğraf Seç</label>
@@ -284,7 +307,7 @@
                         <textarea id="main-memory-text" placeholder="Bu anının hikayesi..." class="custom-input h-[50px] resize-none pt-3"></textarea>
                     </div>
                 </div>
-                <button onclick="window.saveMemoryFromMain()" class="w-full mt-6 py-4 btn-love text-sm font-bold uppercase shadow-lg">LİSTEYE EKLE</button>
+                <button onclick="window.saveMemoryFromMain()" class="w-full mt-6 py-4 btn-love text-sm font-bold uppercase shadow-lg hover:shadow-xl transition-all">LİSTEYE EKLE</button>
             </div>
 
             <div id="memory-archive-list" class="space-y-8">
@@ -303,6 +326,7 @@
         import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // Firebase Config
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyCbIuOJeKNpJToMg2-PsblLtue-mzElUQY",
             authDomain: "tezz-95f0d.firebaseapp.com",
@@ -362,9 +386,13 @@
 
         const setupListeners = (db, user) => {
             if (!user) return;
+
+            // Notlar
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), orderBy('createdAt', 'desc')), 
                 (snap) => { allNotes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); renderNotes(); }
             );
+
+            // Sözler
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler'), 
                 (snap) => {
                     quotesPool = {};
@@ -373,6 +401,8 @@
                     if(currentUser === 'İlker') renderQuotesList();
                 }
             );
+
+            // Anılar (Fotoğraflı)
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'ani_kosesi'), orderBy('tarih', 'desc')),
                 (snap) => {
                     allMemories = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -394,6 +424,7 @@
 
         window.logout = () => { currentUser = null; localStorage.removeItem('romantik_user'); updateUI(); };
 
+        // --- UI UPDATES ---
         function displayDailyMessage() {
             const quoteEl = document.getElementById('current-quote');
             if(!quoteEl) return;
@@ -404,25 +435,22 @@
             const monthStr = String(now.getMonth() + 1).padStart(2, '0');
             const key = `${dayStr}-${monthStr}`;
 
-            // Akıllı Mesaj Seçici
             let message = "";
-            if (quotesPool[key]) {
-                // 1. Öncelik: O tarihe özel mesaj
-                message = quotesPool[key];
-            } else if (Object.keys(quotesPool).length > 0) {
-                // 2. Öncelik: Kayıtlı mesajlardan sırayla (Döngüsel)
+            if (key === '08-02') message = "Seni çok seviyorum"; // Özel gün
+            else if (quotesPool[key]) message = quotesPool[key]; // O güne özel kayıtlı
+            else if (Object.keys(quotesPool).length > 0) {
+                // Döngüsel Mesaj Gösterimi
                 const keys = Object.keys(quotesPool).sort();
-                // Basit bir hash ile güne göre sabit bir mesaj seç
-                const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-                const index = dayOfYear % keys.length;
-                message = quotesPool[keys[index]];
+                const startOfYear = new Date(now.getFullYear(), 0, 0);
+                const diff = now - startOfYear;
+                const oneDay = 1000 * 60 * 60 * 24;
+                const dayOfYear = Math.floor(diff / oneDay);
+                message = quotesPool[keys[dayOfYear % keys.length]];
             } else {
-                // 3. Öncelik: Hiç mesaj yoksa varsayılan
                 message = "Seni her gün daha çok seviyorum...";
             }
             
             quoteEl.innerText = `"${message}"`;
-            quoteEl.className = "text-rose-800 text-xl md:text-3xl font-bold italic leading-relaxed quote-active-text font-serif";
         }
 
         function updateUI() {
@@ -479,11 +507,11 @@
             }
             container.innerHTML = allMemories.map(m => `
                 <div class="memory-card-wide group">
-                    ${m.foto_url ? `<div class="memory-img-container"><img src="${m.foto_url}" alt="Anı Fotoğrafı"></div>` : ''}
-                    <div class="memory-content-container" style="${!m.foto_url ? 'width: 100%;' : ''}">
+                    ${m.foto_url ? `<div class="memory-img-col"><img src="${m.foto_url}" alt="Anı Fotoğrafı"></div>` : ''}
+                    <div class="memory-content-col" style="${!m.foto_url ? 'width: 100%;' : ''}">
                         <span class="memory-date-badge">${new Date(m.tarih).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                         <p class="text-lg font-medium text-rose-900 leading-relaxed italic mb-4">"${m.aciklama}"</p>
-                        ${currentUser ? `<button onclick="window.deleteMemory('${m.id}')" class="absolute top-4 right-4 text-rose-200 hover:text-rose-500 font-bold text-xs uppercase opacity-0 group-hover:opacity-100 transition-opacity">SİL</button>` : ''}
+                        ${currentUser ? `<button onclick="window.deleteMemory('${m.id}')" class="absolute top-4 right-4 text-rose-300 hover:text-rose-600 font-bold text-xs uppercase opacity-0 group-hover:opacity-100 transition-opacity">SİL</button>` : ''}
                     </div>
                 </div>
             `).join('');
@@ -494,14 +522,14 @@
             if(!list) return;
             const keys = Object.keys(dailyQuotes).sort();
             if(keys.length === 0) {
-                list.innerHTML = '<p class="text-[10px] text-rose-300 italic p-2">Henüz özel gün eklenmemiş.</p>';
+                list.innerHTML = '<p class="text-[10px] text-rose-300 italic p-4 text-center">Henüz özel gün eklenmemiş.</p>';
                 return;
             }
             list.innerHTML = keys.map(dateKey => `
-                <div class="p-3 bg-white border border-rose-100 rounded-xl flex justify-between items-center group shadow-sm">
-                    <div class="flex-1">
+                <div class="quote-list-item group">
+                    <div class="flex-1 overflow-hidden">
                         <span class="text-[10px] font-black text-rose-500 bg-rose-50 px-2 py-1 rounded-lg mr-2">${dateKey}</span>
-                        <span class="text-xs text-slate-600 italic truncate inline-block align-bottom max-w-[120px]">"${dailyQuotes[dateKey]}"</span>
+                        <span class="text-xs text-slate-600 italic truncate inline-block align-bottom max-w-[140px]">"${dailyQuotes[dateKey]}"</span>
                     </div>
                     <button onclick="window.deleteDailyQuote('${dateKey}')" class="text-rose-300 hover:text-rose-600 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">SİL</button>
                 </div>
@@ -542,7 +570,7 @@
             let photoUrl = null;
             if (photoInput.files && photoInput.files[0]) {
                 const file = photoInput.files[0];
-                if(file.size > 1024 * 1024 * 2) return showToast("Fotoğraf 2MB'dan büyük olamaz!");
+                if(file.size > 1024 * 1024 * 5) return showToast("Fotoğraf 5MB'dan büyük olamaz!");
                 try {
                     photoUrl = await new Promise((resolve, reject) => {
                         const reader = new FileReader();
@@ -575,20 +603,9 @@
         }
 
         // Müzik Kontrolleri
-        window.nextSong = () => {
-            currentSongIndex = (currentSongIndex + 1) % playlist.length;
-            playSong(currentSongIndex);
-        };
-        window.prevSong = () => {
-            currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
-            playSong(currentSongIndex);
-        };
-        window.togglePlay = () => {
-            if(!player) return;
-            const state = player.getPlayerState();
-            if(state === 1) player.pauseVideo();
-            else player.playVideo();
-        };
+        window.nextSong = () => { currentSongIndex = (currentSongIndex + 1) % playlist.length; playSong(currentSongIndex); };
+        window.prevSong = () => { currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length; playSong(currentSongIndex); };
+        window.togglePlay = () => { if(player) { const s = player.getPlayerState(); (s === 1) ? player.pauseVideo() : player.playVideo(); } };
 
         function playSong(index) {
             if(!player) return;
@@ -598,18 +615,8 @@
         }
 
         window.toggleAdmin = () => document.getElementById('admin-panel').classList.toggle('translate-x-full');
-        window.switchTab = (tab) => {
-            const tQuotes = document.getElementById('tab-quotes');
-            const tNotes = document.getElementById('tab-notes');
-            const sQuotes = document.getElementById('sidebar-quotes-content');
-            
-            // Sadece Quotes tab'ı aktif
-            if(tQuotes) tQuotes.className = `tab-btn flex-1 text-[10px] font-bold py-2 rounded-xl ${tab === 'quotes' ? 'active' : 'inactive'}`;
-            if(sQuotes) sQuotes.className = tab === 'quotes' ? 'space-y-4' : 'hidden';
-            // Notes sekmesini gizle (artık ana sayfada)
-            if(tNotes) tNotes.style.display = 'none';
-        };
-
+        
+        // YouTube API
         window.onYouTubeIframeAPIReady = function() {
             player = new YT.Player('player', {
                 height: '0', width: '0', videoId: playlist[0].id,
