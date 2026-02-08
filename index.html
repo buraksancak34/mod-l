@@ -3,744 +3,637 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Derya & İlker - Bizim Dünyamız</title>
-    <!-- Tailwind CSS -->
+    <title>İlker & Derya - Bizim Dünyamız</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- YouTube API -->
     <script src="https://www.youtube.com/iframe_api"></script>
-    <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { rose: { 600: '#e11d48' }, pink: { 500: '#ec4899' }, slate: { 50: '#f8fafc' } },
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], romantic: ['"Dancing Script"', 'cursive'] },
+                    animation: { 'spin-slow': 'spin 8s linear infinite' }
+                }
+            }
+        }
+    </script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(135deg, #fff5f5 0%, #fff1f2 100%);
-            color: #4c0519;
-            margin: 0; padding: 0; overflow-x: hidden; min-height: 100vh;
-        }
-
-        .romantic-font { font-family: 'Dancing Script', cursive; }
-
+        body { background: linear-gradient(135deg, #f8fafc 0%, #fff1f2 100%); min-height: 100vh; overflow-x: hidden; }
+        
         .glass-card {
-            background: rgba(255, 255, 255, 0.65);
-            border: 1px solid rgba(255, 192, 203, 0.6);
-            backdrop-filter: blur(15px);
-            box-shadow: 0 10px 40px rgba(159, 18, 57, 0.04);
-            transition: all 0.4s ease;
-        }
-        
-        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 15px 50px rgba(159, 18, 57, 0.1); border-color: #fda4af; }
-
-        .admin-sidebar {
-            background: rgba(255, 255, 255, 0.98);
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: -15px 0 50px rgba(0, 0, 0, 0.08);
-            z-index: 999999;
-        }
-
-        .custom-input {
-            background: #fff !important; border: 2px solid #ffe4e6 !important;
-            color: #881337 !important; padding: 12px !important;
-            border-radius: 16px !important; width: 100% !important;
-        }
-
-        .custom-input:focus { border-color: #fb7185 !important; outline: none; }
-
-        .btn-love {
-            background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
-            color: white; border-radius: 20px; font-weight: 700;
-            transition: all 0.3s; cursor: pointer; border: none;
-        }
-        .btn-love:hover { filter: brightness(1.1); transform: scale(1.05); }
-
-        /* Mesajlaşma Balonları */
-        .chat-bubble {
-            max-width: 80%;
-            padding: 16px;
-            border-radius: 20px;
-            position: relative;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .chat-bubble.sent {
-            background: #e11d48; /* Kırmızı tonu */
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-        }
-        .chat-bubble.received {
-            background: #fff;
-            color: #4c0519;
-            align-self: flex-start;
-            border: 1px solid #ffe4e6;
-            border-bottom-left-radius: 4px;
-        }
-        .chat-meta {
-            font-size: 0.65rem;
-            margin-top: 6px;
-            opacity: 0.8;
-            text-align: right;
-        }
-
-        .hidden-mode { display: none !important; }
-        .heart-beat { animation: beat 1.5s infinite; display: inline-block; color: #e11d48; }
-        @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
-
-        #toast {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #4c0519; color: white; padding: 12px 24px;
-            border-radius: 50px; font-size: 14px; font-weight: 600;
-            z-index: 1000000; opacity: 0; transition: opacity 0.3s; pointer-events: none;
-        }
-
-        #daily-quote-area {
-            min-height: 140px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .quote-active-text { animation: slideUp 1s ease forwards; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Anı Kartları */
-        .memory-timeline-card {
-            background: white;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px rgba(225, 29, 72, 0.05);
             border-radius: 1.5rem;
-            padding: 1.5rem;
-            border: 1px solid #ffe4e6;
-            margin-bottom: 1rem;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        .memory-timeline-card:hover {
-            transform: scale(1.01);
-            box-shadow: 0 10px 25px rgba(225, 29, 72, 0.05);
-        }
-        .memory-date-badge {
-            background: #ffe4e6;
-            color: #be123c;
-            padding: 6px 16px; border-radius: 20px;
-            font-size: 11px; font-weight: 800;
-            display: inline-block; margin-bottom: 8px;
-            border: 1px solid #fecdd3;
+            transition: transform 0.3s ease;
         }
         
-        .swiper-pagination-bullet-active { background: #e11d48 !important; }
-
-        /* Müzik Player */
-        #music-player-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
-            border-top: 1px solid #ffe4e6; padding: 15px 24px;
-            display: flex; justify-content: space-between; align-items: center;
-            z-index: 5000; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); transition: transform 0.3s;
-        }
+        /* Zarf Efekti */
+        .envelope-card { cursor: pointer; position: relative; overflow: hidden; transition: all 0.3s ease; }
+        .envelope-card:hover { transform: translateX(5px); background: #fff1f2; }
         
-        /* Liste Stili */
-        .quote-list-item {
-            padding: 12px;
-            border-bottom: 1px solid #ffe4e6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .quote-list-item:last-child { border-bottom: none; }
-        
-        .tab-btn { padding: 8px 4px; font-weight: 800; font-size: 10px; border-radius: 10px; transition: all 0.2s; text-transform: uppercase; }
-        .tab-btn.active { background: #e11d48; color: white; box-shadow: 0 4px 10px rgba(225, 29, 72, 0.2); }
-        .tab-btn.inactive { background: #fff1f2; color: #fb7185; }
+        .blur-lock { filter: blur(10px); pointer-events: none; user-select: none; }
+        .unlocked { filter: blur(0); pointer-events: auto; transition: filter 0.8s ease; }
 
-        /* Motto Alanı */
-        #motto-section {
-            background: linear-gradient(to right, #fff1f2, #fff, #fff1f2);
-            border-bottom: 1px solid #ffe4e6; padding: 12px; text-align: center;
-            font-style: italic; color: #be123c; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;
-        }
-        
-        /* Gizli İçerik */
-        .private-section { transition: opacity 0.5s ease; }
-        .private-section.hidden-content { display: none; opacity: 0; }
-        .private-section.visible-content { display: block; opacity: 1; animation: slideUpContent 0.8s ease; }
-        @keyframes slideUpContent { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Gizli Kart (Uzman Görüşü) */
-        .blur-reveal-container {
-            position: relative; overflow: hidden; border-radius: 1.5rem;
-            background: white; border: 1px dashed #fda4af; cursor: pointer;
-        }
-        .blur-overlay {
-            position: absolute; inset: 0;
-            background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;
-            flex-direction: column; z-index: 10; transition: opacity 0.5s ease;
-        }
-        .blur-reveal-container.revealed .blur-overlay { opacity: 0; pointer-events: none; }
-        .info-slide {
-            height: 250px; display: flex; align-items: center; justify-content: center;
-            padding: 30px; text-align: center; font-size: 1.1rem; color: #881337; font-weight: 500;
-            background: #fff0f3; border-radius: 1rem;
-        }
-
-        /* Swiper Anı Kartı */
-        .memory-card-wide { background: white; border-radius: 1.5rem; overflow: hidden; border: 1px solid #ffe4e6; display: flex; flex-direction: column; transition: all 0.3s ease; height: 100%; }
-        @media (min-width: 768px) { .memory-card-wide { flex-direction: row; height: 350px; } .memory-img-col { width: 45%; height: 100%; } .memory-content-col { width: 55%; padding: 2rem; display: flex; flex-direction: column; justify-content: center; } }
-        @media (max-width: 767px) { .memory-img-col { width: 100%; height: 200px; } .memory-content-col { padding: 1.5rem; } }
-        .memory-img-col img { width: 100%; height: 100%; object-fit: cover; }
+        /* Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #fda4af; border-radius: 4px; }
     </style>
 </head>
-<body class="antialiased pb-24" onclick="playMusicOnFirstInteraction()">
+<body class="text-slate-800 pb-24">
 
-    <div id="toast">İşlem Başarılı!</div>
-    
-    <!-- Müzik Oynatıcı (Gizli) -->
-    <div id="player" style="display:none;"></div>
+    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-rose-900 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity duration-300 z-[99999] text-sm font-bold pointer-events-none"></div>
 
-    <!-- Motto Alanı -->
-    <div id="motto-section">
-        <span id="daily-motto">Aile, sevginin başladığı yerdir.</span>
+    <div class="bg-white/80 border-b border-rose-100 py-3 text-center sticky top-0 z-40 backdrop-blur">
+        <p id="top-motto" class="text-xs md:text-sm font-bold text-rose-500 tracking-widest uppercase animate-pulse">
+            "Yükleniyor..."
+        </p>
     </div>
 
-    <!-- Müzik Kontrol Barı -->
-    <div id="music-player-bar" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur border-t border-rose-100 p-4 flex justify-between items-center z-50 shadow-lg transform translate-y-full transition-transform duration-300">
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 animate-spin-slow">🎵</div>
-            <div class="flex-1 min-w-0 pr-4">
-                <p id="music-title" class="text-xs font-bold text-rose-900 truncate">Müzik Yükleniyor...</p>
-                <p class="text-[10px] text-rose-400 font-medium">İlker & Derya Playlist</p>
-            </div>
-        </div>
-        <div class="flex gap-4 items-center shrink-0">
-            <button onclick="window.prevSong()" class="text-rose-300 hover:text-rose-600 text-2xl p-2">⏮</button>
-            <button onclick="window.togglePlay()" id="play-btn" class="w-12 h-12 bg-rose-500 rounded-full text-white flex items-center justify-center shadow-lg hover:bg-rose-600 text-xl">▶</button>
-            <button onclick="window.nextSong()" class="text-rose-300 hover:text-rose-600 text-2xl p-2">⏭</button>
-        </div>
-    </div>
-
-    <!-- Şifre Modalı -->
-    <div id="password-modal" class="fixed inset-0 bg-black/50 z-[999999] hidden flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white p-6 rounded-3xl shadow-2xl w-80 text-center animate-bounce-in">
-            <h3 class="text-xl font-black text-rose-600 mb-4">Giriş Yap</h3>
-            <p id="modal-user-name" class="text-sm text-slate-500 mb-4">Kullanıcı</p>
-            <input type="password" id="modal-password" placeholder="Şifre" class="custom-input text-center text-lg mb-4">
-            <div class="flex gap-2">
-                <button onclick="window.closeLoginModal()" class="flex-1 py-3 rounded-xl border border-rose-100 text-rose-400 font-bold text-xs">İPTAL</button>
-                <button onclick="window.submitLogin()" class="flex-1 py-3 rounded-xl bg-rose-500 text-white font-bold text-xs shadow-lg hover:bg-rose-600">GİRİŞ</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Editör Paneli -->
-    <div id="admin-panel" class="fixed top-0 right-0 h-full w-80 admin-sidebar translate-x-full overflow-y-auto p-8 border-l border-rose-100">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-black text-rose-800 flex items-center gap-2">🛠️ Editör Paneli</h2>
-            <button onclick="window.toggleAdmin()" class="text-rose-300 hover:text-rose-600 text-3xl">&times;</button>
-        </div>
-
-        <div class="flex gap-1 mb-8 bg-rose-50 p-1 rounded-2xl">
-            <button onclick="window.switchTab('quotes')" id="tab-quotes" class="tab-btn active flex-1 text-[10px]">365 GÜN</button>
-            <button onclick="window.switchTab('mottos')" id="tab-mottos" class="tab-btn inactive flex-1 text-[10px]">MOTTOLAR</button>
-        </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <div id="sidebar-quotes-content" class="space-y-6">
-            <div>
-                <h3 class="text-rose-600 text-[11px] font-black uppercase mb-3 tracking-widest">Güne Özel Mesaj Ekle</h3>
-                <div class="space-y-3">
-                    <div>
-                        <label class="text-[10px] font-bold text-rose-400 block mb-1">TARİH SEÇ</label>
-                        <input type="date" id="quote-date" class="custom-input">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-rose-400 block mb-1">MESAJINIZ</label>
-                        <textarea id="daily-quote-text" placeholder="Bu tarihte ne yazsın?..." class="custom-input h-32"></textarea>
-                    </div>
-                    <button onclick="window.saveDailyQuote()" class="w-full py-4 btn-love text-xs font-bold uppercase shadow-lg">KAYDET</button>
+        <header class="flex flex-col md:flex-row justify-between items-center mb-12 gap-8">
+            <div class="text-center md:text-left">
+                <h1 class="font-romantic text-6xl md:text-7xl text-rose-600">İlker <span class="text-4xl text-pink-400">&</span> Derya</h1>
+                <p class="text-slate-400 font-medium mt-2 tracking-wide">Bizim Dünyamız</p>
+            </div>
+            
+            <div class="flex gap-4">
+                <div class="glass-card p-4 text-center min-w-[140px]">
+                    <div class="text-[10px] text-rose-400 font-black uppercase">Evlilik</div>
+                    <div id="counter-marriage" class="text-2xl font-black text-slate-700">...</div>
+                    <div class="text-[9px] text-slate-400">Gün Oldu</div>
                 </div>
-            </div>
-            <div class="pt-6 border-t border-rose-100">
-                <h4 class="text-[10px] font-black text-rose-400 uppercase mb-3 tracking-widest">Planlanmış Günler</h4>
-                <div id="saved-quotes-list" class="bg-white rounded-xl border border-rose-100 max-h-64 overflow-y-auto custom-scroll p-2"></div>
-            </div>
-        </div>
-
-        <div id="sidebar-mottos-content" class="hidden space-y-4">
-            <h3 class="text-rose-600 text-[11px] font-black uppercase tracking-widest">Motto Ekle</h3>
-            <textarea id="new-motto-text" placeholder="Yeni motto..." class="custom-input h-24"></textarea>
-            <button onclick="window.addMotto()" class="w-full py-3 btn-love text-xs font-bold">EKLE</button>
-            <div class="pt-4 border-t border-rose-100">
-                <div id="motto-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
-            </div>
-            <button onclick="window.seedMottos()" class="w-full py-2 border border-rose-200 text-rose-400 rounded-lg text-[9px] font-bold uppercase mt-4">Varsayılanları Yükle</button>
-        </div>
-    </div>
-
-    <div class="max-w-6xl mx-auto px-6 py-12">
-        <header class="flex flex-col md:flex-row justify-between items-start mb-20 gap-12">
-            <div class="text-center md:text-left flex-1">
-                <h1 class="text-6xl md:text-8xl romantic-font text-rose-600 leading-tight">Derya ve İlker</h1>
-                <p class="text-rose-400 text-lg mt-2 font-medium tracking-wide">14 yıldır aynı gökyüzüne bakmak... <span class="heart-beat">♥</span></p>
-                
-                <div class="mt-10 flex flex-col gap-8 items-center md:items-start w-full">
-                    <!-- Giriş ve Durum Paneli -->
-                    <div class="flex flex-wrap gap-3 justify-center md:justify-start items-center">
-                        <div id="mode-status" class="bg-white px-5 py-2.5 rounded-full border border-rose-100 text-rose-400 text-[10px] font-black uppercase tracking-widest shadow-sm">
-                            <span id="mode-text">Gözlemci</span>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="window.openLoginModal('Derya')" id="btn-login-derya" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">Derya</button>
-                            <span class="text-rose-200">|</span>
-                            <button onclick="window.openLoginModal('İlker')" id="btn-login-ilker" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">İlker</button>
-                        </div>
-                        <button onclick="window.toggleAdmin()" id="manage-btn" class="hidden-mode btn-love px-8 py-2.5 text-[10px] uppercase shadow-lg ml-4">🛠️ Panel</button>
-                        <button onclick="window.logout()" id="logout-btn" class="hidden-mode text-[10px] font-black uppercase text-rose-300 ml-4 cursor-pointer">Çıkış</button>
-                    </div>
-
-                    <!-- Günlük Mesaj Alanı -->
-                    <div id="daily-quote-area" class="max-w-2xl w-full glass-card p-10 rounded-[3rem] border-rose-200 relative overflow-hidden group">
-                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-200 via-pink-400 to-rose-200"></div>
-                        <div id="quote-display-box" class="text-center w-full relative z-10">
-                            <h4 class="text-[9px] font-black text-rose-300 uppercase tracking-[6px] mb-6">GÜNÜN KALP ATIŞI</h4>
-                            <p id="current-quote" class="text-rose-800 text-2xl md:text-3xl font-bold italic leading-relaxed font-serif">Giriş yapıldığında yüklenecek...</p>
-                        </div>
-                         <div class="absolute -bottom-12 -right-12 text-rose-50 text-9xl opacity-60 rotate-12 pointer-events-none group-hover:scale-110 transition-transform duration-700">♥</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sayaç Paneli -->
-            <div class="flex flex-col gap-6 w-full md:w-[350px]">
-                <div class="glass-card p-10 rounded-[3rem] text-center relative overflow-hidden">
-                    <div class="absolute -top-10 -right-10 text-rose-100 text-9xl opacity-20">♥</div>
-                    <h3 class="text-rose-400 text-[10px] font-black uppercase tracking-[3px] mb-4">Evlilik Yolculuğumuz</h3>
-                    <div id="marriage-counter" class="text-6xl font-black text-rose-600 mb-2">...</div>
-                    <p class="text-rose-400 text-sm font-bold uppercase tracking-widest">Muhteşem Gün</p>
-                </div>
-
-                <div class="glass-card p-8 rounded-[2.5rem] border-rose-50 text-center">
-                    <div class="grid grid-cols-1 gap-2">
-                        <p class="text-[10px] text-rose-300 font-black uppercase tracking-widest">Tanışma: 10 Aralık 2011</p>
-                        <p id="meeting-counter" class="text-3xl font-black text-rose-400">...</p>
-                        <p class="text-[10px] text-rose-300 font-black uppercase">Gündür Beraberiz</p>
-                    </div>
+                <div class="glass-card p-4 text-center min-w-[140px]">
+                    <div class="text-[10px] text-rose-400 font-black uppercase">Tanışma</div>
+                    <div id="counter-meeting" class="text-2xl font-black text-slate-700">...</div>
+                    <div class="text-[9px] text-slate-400">Gün Oldu</div>
                 </div>
             </div>
         </header>
 
-        <!-- --- GİZLİ İÇERİK BÖLÜMÜ --- -->
-        <div id="private-content-wrapper" class="private-section hidden-content">
-            
-            <!-- UZMAN GÖRÜŞÜ (GİZLİ KART) -->
-            <div class="mb-16">
-                <div class="blur-reveal-container p-1 rounded-[2rem] shadow-lg" onclick="this.classList.add('revealed')">
-                    <div class="blur-overlay">
-                        <span class="text-4xl mb-2">🔒</span>
-                        <p class="text-sm font-black text-rose-600 uppercase tracking-widest">Aşk ve Cinsellik Üzerine</p>
-                        <p class="text-[10px] text-rose-400 mt-2 animate-bounce">Tavsiyeleri görmek için dokun</p>
+        <section class="mb-16">
+            <div class="glass-card max-w-3xl mx-auto p-10 text-center relative overflow-hidden">
+                <h2 class="text-xs font-black text-rose-400 uppercase tracking-[0.3em] mb-6">Günün Mesajı</h2>
+                <p id="daily-message-display" class="font-romantic text-3xl md:text-4xl text-slate-700 leading-normal">
+                    "Giriş yapıldığında kalbimiz konuşacak..."
+                </p>
+                <div class="mt-8">
+                    <button onclick="window.openLoginModal()" id="login-trigger-btn" class="bg-rose-500 text-white px-8 py-3 rounded-full text-xs font-bold uppercase shadow-lg hover:bg-rose-600 transition-all">
+                        Giriş Yap
+                    </button>
+                    <div id="user-info-panel" class="hidden flex flex-col items-center gap-2">
+                        <div class="flex items-center gap-2">
+                            <span id="welcome-text" class="text-sm font-bold text-rose-600"></span>
+                            <button onclick="window.toggleAdmin()" id="admin-btn" class="hidden bg-slate-200 text-slate-600 w-6 h-6 rounded-full flex items-center justify-center text-xs">⚙️</button>
+                        </div>
+                        <button onclick="window.logout()" class="text-[10px] text-slate-400 underline">Çıkış</button>
                     </div>
-                    <div class="bg-rose-50 p-6 rounded-[1.8rem]">
-                        <h3 class="text-center text-rose-800 font-bold text-sm uppercase mb-4 tracking-widest">❤️ Uzman Görüşleri & Faydalar</h3>
-                        <div class="swiper expertSwiper">
-                            <div class="swiper-wrapper" id="expert-slides"></div>
-                            <div class="swiper-pagination"></div>
+                </div>
+            </div>
+        </section>
+
+        <div id="secure-layer" class="relative transition-all duration-1000 blur-lock">
+            
+            <div id="lock-overlay" class="absolute inset-0 z-30 flex flex-col items-center justify-center pt-20">
+                <div class="text-6xl mb-4 opacity-50">🔒</div>
+            </div>
+
+            <div class="mb-12">
+                <div class="bg-white rounded-3xl p-1 shadow-sm border border-rose-100">
+                    <div class="bg-rose-50/50 rounded-[1.3rem] p-6 text-center h-40 flex flex-col justify-center relative overflow-hidden">
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 bg-rose-200 text-rose-700 px-3 py-1 text-[9px] font-bold uppercase rounded-b-lg">❤️ İlişki Notları</div>
+                        <div class="swiper expertSwiper w-full h-full">
+                            <div class="swiper-wrapper" id="expert-slides-wrapper">
+                                </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- YAN YANA: MESAJLAR ve TALEPLER -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
-                <!-- Chat (SOL) -->
-                <section class="glass-card rounded-[2.5rem] p-6 border-rose-200 shadow-xl h-[600px] flex flex-col relative">
-                    <h2 class="text-xl font-black text-rose-900 uppercase mb-4 pl-2 flex items-center gap-2">💌 Canlı Sohbet</h2>
-                    <div id="chat-box" class="flex-1 overflow-y-auto p-4 flex flex-col-reverse space-y-reverse space-y-3 mb-4 bg-white/50 rounded-2xl custom-scroll">
-                        <p class="p-10 text-center text-rose-300 italic text-sm">Yükleniyor...</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+                <div class="glass-card p-6 h-[500px] flex flex-col">
+                    <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">💌 Bizim Sohbetimiz</h3>
+                    <div id="chat-container" class="flex-1 overflow-y-auto pr-2 space-y-3 mb-4 custom-scroll bg-white/40 rounded-xl p-4"></div>
+                    <div class="flex gap-2">
+                        <input type="text" id="chat-input" class="flex-1 bg-white border border-rose-100 rounded-xl px-4 text-sm outline-none focus:border-rose-400" placeholder="Bir not bırak...">
+                        <button onclick="window.sendChat()" class="bg-rose-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg hover:bg-rose-600">➤</button>
                     </div>
-                    <div id="message-input-area" class="flex gap-2 items-center bg-white p-2 rounded-2xl border border-rose-100">
-                        <input type="text" id="note-text" placeholder="Bir mesaj yaz..." class="flex-1 p-3 bg-transparent text-sm outline-none text-rose-900 placeholder-rose-300">
-                        <button onclick="window.sendChat()" class="w-10 h-10 bg-rose-500 rounded-full text-white flex items-center justify-center shadow-lg hover:bg-rose-600 transition-all text-lg">➤</button>
-                    </div>
-                </section>
+                </div>
 
-                <!-- Talepler (SAĞ) -->
-                <section class="glass-card rounded-[2.5rem] p-6 border-rose-200 shadow-xl h-[600px] flex flex-col">
-                    <h2 class="text-xl font-black text-rose-900 uppercase mb-4 pl-2 flex items-center gap-2">💫 Kalpten Talepler</h2>
+                <div class="glass-card p-6 h-[500px] flex flex-col">
+                    <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">💫 Kalpten İstekler</h3>
                     
-                    <div class="flex-1 overflow-y-auto custom-scroll pr-2 space-y-4">
-                        <!-- Gelen Talepler (Okunacak) -->
-                        <div class="bg-white/60 rounded-2xl p-4 border border-rose-100 shadow-sm">
-                            <h3 id="incoming-title" class="text-xs font-black text-rose-500 uppercase mb-3 border-b border-rose-100 pb-1">Gelen İstekler</h3>
-                            <ul id="incoming-list" class="space-y-2 text-sm text-slate-600"></ul>
+                    <div class="flex-1 overflow-y-auto mb-4 custom-scroll pr-2">
+                        <div class="mb-6">
+                            <h4 class="text-[10px] font-black text-rose-400 uppercase mb-2">Sana Gelen Zarflar</h4>
+                            <div id="incoming-requests" class="space-y-2"></div>
                         </div>
-
-                        <!-- Giden Talepler (Yönetilecek) -->
-                        <div class="bg-indigo-50/50 rounded-2xl p-4 border border-indigo-100 shadow-sm">
-                            <h3 class="text-xs font-black text-indigo-500 uppercase mb-2 border-b border-indigo-100 pb-1">Senin İsteklerin</h3>
-                            <div class="flex gap-2 mb-3">
-                                <input type="text" id="req-input" placeholder="Yeni bir dilek..." class="custom-input h-9 text-xs">
-                                <button onclick="window.sendRequest()" class="bg-indigo-500 text-white rounded-xl px-4 text-xs font-bold hover:bg-indigo-600 shadow">+</button>
-                            </div>
-                            <ul id="outgoing-list" class="space-y-2 text-sm text-slate-600"></ul>
+                        <div>
+                            <h4 class="text-[10px] font-black text-slate-400 uppercase mb-2">Senin Gönderdiklerin</h4>
+                            <div id="outgoing-requests" class="space-y-1"></div>
                         </div>
                     </div>
-                </section>
+
+                    <div class="bg-pink-50 p-2 rounded-xl border border-pink-100 flex gap-2">
+                        <input type="text" id="request-input" class="flex-1 bg-transparent text-sm outline-none px-2 placeholder-pink-300 text-pink-900" placeholder="Dilek tut...">
+                        <button onclick="window.sendRequest()" class="bg-pink-500 text-white px-4 rounded-lg text-sm font-bold">+</button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Anı Defteri -->
-            <section class="mb-16">
-                <h2 class="text-2xl font-black text-rose-900 uppercase mb-6 px-4">📖 Anı Defteri</h2>
-                <div class="glass-card p-6 rounded-[2.5rem] shadow-xl">
-                    <!-- Swiper -->
-                    <div class="swiper memorySwiper pb-8">
-                        <div class="swiper-wrapper" id="memory-slides"></div>
-                        <div class="swiper-pagination"></div>
+            <section class="mb-24">
+                <div class="flex justify-between items-end mb-6 px-2">
+                    <h2 class="text-2xl font-romantic text-slate-800">Anılarımız</h2>
+                    <button onclick="document.getElementById('memory-form').classList.toggle('hidden')" class="text-xs bg-white border border-rose-200 text-rose-500 px-4 py-2 rounded-full font-bold shadow-sm hover:bg-rose-50">+ ANI EKLE</button>
+                </div>
+
+                <div id="memory-form" class="hidden mb-6 bg-white p-6 rounded-3xl shadow-xl border border-rose-100">
+                    <div class="grid grid-cols-1 gap-4">
+                        <input type="date" id="mem-date" class="w-full text-sm p-3 bg-slate-50 rounded-xl outline-none">
+                        <textarea id="mem-desc" placeholder="Bu anın hikayesi..." class="w-full text-sm p-3 bg-slate-50 rounded-xl outline-none h-20 resize-none"></textarea>
+                        <input type="file" id="mem-file" accept="image/*" class="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-700">
+                        <button onclick="window.saveMemory()" class="w-full bg-rose-600 text-white py-3 rounded-xl font-bold uppercase tracking-wider shadow-lg">KAYDET</button>
                     </div>
-                    
-                    <!-- Anı Ekleme Alanı -->
-                    <div id="memory-add-area-main" class="mt-8 p-6 bg-white/60 rounded-3xl border border-rose-100 shadow-sm">
-                        <h4 class="text-xs font-black text-rose-500 uppercase mb-4 flex items-center gap-2"><span class="text-lg">✨</span> Yeni Bir Anı Kaydet</h4>
-                        <div class="flex flex-col md:flex-row gap-4 items-start">
-                            <div class="w-full md:w-1/3">
-                                <input type="file" id="main-memory-photo" accept="image/*" class="text-xs w-full text-rose-800 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-rose-100 file:text-rose-700 hover:file:bg-rose-200 custom-input">
-                            </div>
-                            <div class="w-full md:w-1/3">
-                                <input type="date" id="main-memory-date" class="custom-input h-12 text-xs">
-                            </div>
-                            <div class="w-full md:w-1/3">
-                                <textarea id="main-memory-text" placeholder="Hikayesi..." class="custom-input h-12 resize-none pt-3 text-xs"></textarea>
-                            </div>
-                        </div>
-                        <button onclick="window.saveMemoryFromMain()" class="w-full mt-4 py-3 btn-love text-sm font-bold uppercase shadow-lg">KAYDET</button>
+                </div>
+
+                <div class="swiper memorySwiper pb-12 px-4">
+                    <div class="swiper-wrapper" id="memory-wrapper">
+                         <div class="swiper-slide flex items-center justify-center bg-white h-60 rounded-2xl border border-rose-100">
+                             <p class="text-slate-400 text-sm">Henüz anı eklenmedi...</p>
+                         </div>
                     </div>
+                    <div class="swiper-pagination"></div>
                 </div>
             </section>
         </div>
-        
-        <footer class="text-center text-rose-300 text-[10px] font-bold pb-10 uppercase tracking-widest">Sonsuzluğa kadar...</footer>
     </div>
 
-    <!-- Scripts -->
+    <div id="admin-sidebar" class="fixed top-0 right-0 h-full w-80 bg-white shadow-[0_0_40px_rgba(0,0,0,0.1)] transform translate-x-full transition-transform duration-300 z-[10000] p-6 overflow-y-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="font-bold text-slate-800 text-lg">Yönetim Paneli</h2>
+            <button onclick="window.toggleAdmin()" class="text-2xl text-slate-300 hover:text-rose-500">&times;</button>
+        </div>
+        
+        <div class="space-y-8">
+            <div class="bg-rose-50 p-4 rounded-2xl">
+                <label class="text-[10px] font-black text-rose-400 block mb-2 uppercase">Güne Özel Mesaj</label>
+                <input type="date" id="admin-quote-date" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-rose-100">
+                <textarea id="admin-quote-text" class="w-full bg-white p-2 rounded-lg mb-2 text-xs h-16 border border-rose-100" placeholder="Mesaj..."></textarea>
+                <button onclick="window.saveAdminQuote()" class="w-full bg-rose-500 text-white py-2 rounded-lg text-xs font-bold shadow-md">KAYDET</button>
+                
+                <div class="mt-4 pt-4 border-t border-rose-200">
+                    <h4 class="text-[9px] font-bold text-rose-400 uppercase mb-2">Kayıtlı Günler</h4>
+                    <div id="admin-quote-list" class="max-h-32 overflow-y-auto space-y-1"></div>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-2xl">
+                <label class="text-[10px] font-black text-slate-400 block mb-2 uppercase">Yeni Motto</label>
+                <input type="text" id="admin-motto-text" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-slate-200" placeholder="Motto...">
+                <button onclick="window.saveAdminMotto()" class="w-full bg-slate-700 text-white py-2 rounded-lg text-xs font-bold shadow-md">EKLE</button>
+                
+                <div class="mt-4 pt-4 border-t border-slate-200">
+                    <h4 class="text-[9px] font-bold text-slate-400 uppercase mb-2">Mottolar</h4>
+                    <div id="admin-motto-list" class="max-h-32 overflow-y-auto space-y-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="music-bar" class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-rose-100 p-3 flex justify-between items-center z-50 transform translate-y-full transition-transform duration-500">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center animate-spin-slow text-rose-500 shadow-inner">🎵</div>
+            <div>
+                <p id="song-name" class="text-xs font-bold text-slate-800">Yükleniyor...</p>
+                <p class="text-[10px] text-slate-400">Derya & İlker Playlist</p>
+            </div>
+        </div>
+        <div class="flex gap-4 pr-4">
+            <button onclick="player.pauseVideo()" class="text-slate-400 hover:text-rose-600">II</button>
+            <button onclick="player.playVideo()" class="text-rose-500 hover:scale-110 transition-transform text-xl">▶</button>
+            <button onclick="window.nextSong()" class="text-slate-400 hover:text-rose-600">⏭</button>
+        </div>
+        <div id="yt-player" class="hidden"></div>
+    </div>
+
+    <div id="login-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] hidden flex items-center justify-center">
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-80 text-center relative animate-bounce-in">
+            <button onclick="document.getElementById('login-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-300 text-xl">&times;</button>
+            <h3 class="text-xl font-romantic text-rose-600 mb-6">Hoş Geldiniz</h3>
+            <input type="password" id="password-input" class="w-full text-center text-lg tracking-[5px] p-3 border-b-2 border-rose-100 outline-none focus:border-rose-500 mb-6 font-bold text-rose-900" placeholder="****">
+            <button onclick="window.attemptLogin()" class="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 rounded-xl font-bold shadow-lg">GİRİŞ</button>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, deleteDoc, query, orderBy, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, addDoc, deleteDoc, onSnapshot, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-        // Firebase Config
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyCbIuOJeKNpJToMg2-PsblLtue-mzElUQY",
+        const firebaseConfig = {
+            apiKey: "AIzaSyCbIuOJeKNpJToMg2-PsblLtue-mzElUQY", 
             authDomain: "tezz-95f0d.firebaseapp.com",
             projectId: "tezz-95f0d",
-            storageBucket: "tezz-95f0d.firebasestorage.app",
+            storageBucket: "tezz-95f0d.appspot.com",
             messagingSenderId: "87135277271",
-            appId: "1:87135277271:web:49cc5d5ee7b473bfa7a092",
-            measurementId: "G-D2WLJXGP67"
+            appId: "1:87135277271:web:49cc5d5ee7b473bfa7a092"
         };
 
-        const appId = 'derya-ilker-love-v3'; 
-        let currentUser = null; 
-        let allNotes = [], quotesPool = {}, allMemories = [], mottosPool = [], requestsIlker = [], requestsDerya = [];
-        let db, player, musicStarted = false, expertSwiper, loginPendingUser = null;
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const APP_ID = 'bizim_dunyamiz_v2'; // Temiz ID
 
-        const expertTips = [
-            "Duygusal bağın bedensel yolla pekişmesini sağlar.", "Partnerler arasında yakınlık ve samimiyeti artırır.", "Sevildiğini ve arzulandığını hissettirebilir.", "İlişkideki güven duygusunu güçlendirebilir.", "Stresi azaltarak ilişki iklimini yumuşatır.", "Çiftler arasında özel ve paylaşılan bir alan yaratır.", "Sözel olmayan bir iletişim biçimi sunar.", "İlişkideki romantizmi canlı tutabilir.", "Duygusal tatminle fiziksel tatmini birbirine bağlar.", "Partnerlerin birbirini tanımasını hızlandırır.", "Bedensel uyumun fark edilmesini sağlar.", "İlişkiye eğlence ve oyun duygusu katabilir.", "Uzun süreli ilişkilerde bağlanmayı destekler.", "Çatışma sonrası yakınlaşmayı kolaylaştırabilir.", "Kendilik algısını ve özgüveni olumlu etkileyebilir.", "Partnerler arası empatiyi artırabilir.", "İlişkinin “biz” duygusunu derinleştirir.", "Fiziksel temas yoluyla duygusal regülasyona katkı sağlar.", "Sadakat ve bağlılık algısını güçlendirebilir.", "İlişkinin canlı ve dinamik kalmasına yardımcı olur.", "Partnerler arası sınırların ve rızanın öğrenilmesini sağlar.", "Duygusal ihtiyaçların fark edilmesine aracı olabilir.", "İlişkide tatmin düzeyini etkileyen önemli faktörlerden biridir.", "Sevgi dilinin bir parçası olarak işlev görebilir.", "Paylaşım ve karşılıklılık duygusunu artırır.", "Partnerlerin birbirine karşı şefkatini besleyebilir.", "İlişki doyumunu dolaylı olarak yükseltebilir.", "Uzun vadede ilişkinin sürdürülebilirliğine katkı sunabilir.", "Bireysel arzuların ve sınırların konuşulmasını teşvik eder.", "Aşkın yalnızca zihinsel değil, bedensel bir deneyim olduğunu hatırlatır."
-        ];
-        
+        // Varsayılan Veriler (Seed Data)
         const defaultMottos = [
-            "Yeryüzünde sevginin en güçlü halidir aile.", "Bu hayatta yerini dolduramayacağımız yegane şeydir aile.", "Mutluluk ve huzurdur aile.", "Bu hayattaki en büyük zenginlik ailedir.", "Aile, koşulsuz sevgi demektir.", "Bu hayatta sırtınızı hiç düşünmeden dayayabileceğiniz tek şey ailedir."
+            "Aile, sevginin başladığı yerdir.", 
+            "Birlikte her şey daha güzel.", 
+            "Sonsuzluğa kadar el ele.",
+            "Evimiz kalbimizin olduğu yerdir."
+        ];
+        const defaultExperts = [
+            "Birbirinize her gün en az bir kez sarılın.", 
+            "Birlikte gülmek, en iyi terapidir.", 
+            "Küçük sürprizler aşkı canlı tutar.",
+            "Sorunları yatağa girmeden çözün.",
+            "Ortak hayaller kurmaya devam edin.",
+            "Dinlemek, konuşmaktan daha değerlidir.",
+            "Birbirinizin alanına saygı duyun.",
+            "Teşekkür etmeyi unutmayın."
         ];
 
-        const playlist = [ { id: 'hUB9M88kAdI', title: 'Sezen Aksu - Hoş Geldin' }, { id: '7VUu1TuDjRI', title: 'Pinhani - Beni Sen İnandır' } ];
-        let currentSongIndex = 0;
-        const marriageDate = new Date('2019-10-27');
-        const meetingDate = new Date('2011-12-10');
+        let currentUser = localStorage.getItem('bizim_user');
+        let mottos = [...defaultMottos];
+        let quotes = {};
 
-        const showToast = (msg) => { const t = document.getElementById('toast'); if(t){ t.innerText = msg; t.style.opacity = "1"; setTimeout(() => t.style.opacity = "0", 3000); } };
+        // --- GLOBAL FONKSİYONLAR (WINDOW) ---
+        
+        window.openLoginModal = () => document.getElementById('login-modal').classList.remove('hidden');
+        
+        window.attemptLogin = () => {
+            const pass = document.getElementById('password-input').value;
+            let user = null;
+            if (pass === '1881') user = 'Derya';
+            else if (pass === '1992') user = 'İlker';
 
-        const startApp = async () => {
-            updateCounters(); 
-            const savedUser = localStorage.getItem('romantik_user');
-            if (savedUser) { currentUser = savedUser; updateUI(); }
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('bizim_user', user);
+                document.getElementById('login-modal').classList.add('hidden');
+                document.getElementById('password-input').value = '';
+                showToast(`Hoş geldin ${user} ❤️`);
+                updateUI();
+            } else {
+                showToast('Şifre hatalı!');
+            }
+        };
 
+        window.logout = () => { localStorage.removeItem('bizim_user'); currentUser = null; location.reload(); };
+
+        window.toggleAdmin = () => document.getElementById('admin-sidebar').classList.toggle('translate-x-full');
+
+        // CHAT GÖNDERME
+        window.sendChat = async () => {
+            const inp = document.getElementById('chat-input');
+            if(!inp.value.trim() || !currentUser) return;
             try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                const auth = getAuth(app);
-                await setPersistence(auth, browserLocalPersistence);
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    try { await signInWithCustomToken(auth, __initial_auth_token); } catch(e) { await signInAnonymously(auth); }
-                } else { await signInAnonymously(auth); }
-
-                onAuthStateChanged(auth, async (user) => { if (user) setupListeners(db, user); });
-            } catch (e) { console.error(e); }
-            setInterval(updateCounters, 1000 * 60);
-            
-            document.getElementById('note-text')?.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window.sendChat(); }
-            });
+                await addDoc(collection(db, 'artifacts', APP_ID, 'chat'), {
+                    text: inp.value,
+                    sender: currentUser,
+                    createdAt: Date.now()
+                });
+                inp.value = '';
+            } catch(e) { console.error(e); showToast("Hata: " + e.message); }
         };
 
-        const setupListeners = (db, user) => {
-            if (!user) return;
-            // Catch errors gracefully
-            const catchErr = (e) => {
-                if(e.code === 'permission-denied') console.warn('Lütfen Firebase kurallarını güncelleyin: match /{document=**} { allow read, write: if true; }');
+        // TALEP GÖNDERME
+        window.sendRequest = async () => {
+            const inp = document.getElementById('request-input');
+            if(!inp.value.trim() || !currentUser) return;
+            const target = currentUser === 'İlker' ? 'Derya' : 'İlker';
+            try {
+                await addDoc(collection(db, 'artifacts', APP_ID, 'requests'), {
+                    text: inp.value,
+                    from: currentUser,
+                    to: target,
+                    createdAt: Date.now()
+                });
+                inp.value = '';
+                showToast('Zarf gönderildi 💌');
+            } catch(e) { console.error(e); showToast("Hata oluştu"); }
+        };
+
+        // ANI KAYDETME
+        window.saveMemory = async () => {
+            const date = document.getElementById('mem-date').value;
+            const desc = document.getElementById('mem-desc').value;
+            const file = document.getElementById('mem-file').files[0];
+
+            if(!date || !desc || !file) return showToast('Tüm alanları doldurun!');
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    await addDoc(collection(db, 'artifacts', APP_ID, 'memories'), {
+                        date, desc, image: e.target.result, addedBy: currentUser, createdAt: Date.now()
+                    });
+                    document.getElementById('memory-form').classList.add('hidden');
+                    // Formu temizle
+                    document.getElementById('mem-date').value = '';
+                    document.getElementById('mem-desc').value = '';
+                    document.getElementById('mem-file').value = '';
+                    showToast('Anı eklendi ✨');
+                } catch(err) {
+                    console.error(err);
+                    showToast("Anı kaydedilemedi!");
+                }
             };
-
-            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'mottos'), (snap) => {
-                mottosPool = snap.exists() ? (snap.data().list || defaultMottos) : defaultMottos;
-                displayRandomMotto();
-                if(currentUser) renderMottosList();
-            }, catchErr);
-
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'requests_ilker'), (snap) => {
-                requestsIlker = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); renderRequests();
-            }, catchErr);
-            
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'requests_derya'), (snap) => {
-                requestsDerya = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); renderRequests();
-            }, catchErr);
-            
-            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), orderBy('createdAt', 'desc')), (snap) => { 
-                const msgs = snap.docs.map(d => ({id:d.id, ...d.data()})); 
-                renderChat(msgs); 
-            }, catchErr);
-            
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler'), (snap) => { 
-                quotesPool = {}; snap.docs.forEach(d => quotesPool[d.id] = d.data().text); 
-                displayDailyQuote(); 
-                if(currentUser==='İlker') renderQuotesList(); 
-            }, catchErr);
-            
-            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'ani_kosesi'), orderBy('tarih', 'desc')), (snap) => { 
-                allMemories = snap.docs.map(d => ({id:d.id,...d.data()})); 
-                renderMemorySlider(); 
-            }, catchErr);
+            reader.readAsDataURL(file);
         };
 
-        // --- CORE FUNCTIONS ---
-        function displayRandomMotto() {
-            const el = document.getElementById('daily-motto');
-            if (mottosPool.length > 0) el.innerText = `"${mottosPool[Math.floor(Math.random() * mottosPool.length)]}"`;
-            else el.innerText = '"Aile her şeydir."';
+        // ADMIN: SÖZ KAYDETME
+        window.saveAdminQuote = async () => {
+            const d = document.getElementById('admin-quote-date').value;
+            const t = document.getElementById('admin-quote-text').value;
+            if(!d || !t) return showToast("Tarih ve mesaj seçin");
+            const key = d.split('-').reverse().slice(0,2).join('-');
+            await setDoc(doc(db, 'artifacts', APP_ID, 'quotes', key), { text: t });
+            showToast('Mesaj kaydedildi');
+            document.getElementById('admin-quote-text').value = '';
+        };
+
+        // ADMIN: SÖZ SİLME
+        window.deleteAdminQuote = async (key) => {
+             await deleteDoc(doc(db, 'artifacts', APP_ID, 'quotes', key));
+             showToast('Silindi');
+        }
+
+        // ADMIN: MOTTO KAYDETME
+        window.saveAdminMotto = async () => {
+             const t = document.getElementById('admin-motto-text').value;
+             if(!t) return;
+             const newList = [...mottos, t];
+             await setDoc(doc(db, 'artifacts', APP_ID, 'config', 'mottos'), { list: newList });
+             showToast('Motto eklendi');
+             document.getElementById('admin-motto-text').value = '';
+        }
+        
+        // ADMIN: MOTTO SİLME
+        window.deleteAdminMotto = async (idx) => {
+            const newList = mottos.filter((_, i) => i !== idx);
+            await setDoc(doc(db, 'artifacts', APP_ID, 'config', 'mottos'), { list: newList });
+            showToast('Motto silindi');
+        }
+
+
+        // --- UI & LOGIC ---
+        function updateUI() {
+            const secureLayer = document.getElementById('secure-layer');
+            const lockOverlay = document.getElementById('lock-overlay');
+            const loginTrigger = document.getElementById('login-trigger-btn');
+            const userInfo = document.getElementById('user-info-panel');
+            
+            if (currentUser) {
+                secureLayer.classList.remove('blur-lock');
+                secureLayer.classList.add('unlocked');
+                lockOverlay.classList.add('hidden');
+                loginTrigger.classList.add('hidden');
+                userInfo.classList.remove('hidden');
+                document.getElementById('welcome-text').innerText = currentUser;
+                
+                if (currentUser === 'İlker') {
+                    document.getElementById('admin-btn').classList.remove('hidden');
+                }
+                displayDailyQuote(); 
+            } else {
+                secureLayer.classList.add('blur-lock');
+                secureLayer.classList.remove('unlocked');
+                lockOverlay.classList.remove('hidden');
+                loginTrigger.classList.remove('hidden');
+                userInfo.classList.add('hidden');
+            }
         }
 
         function displayDailyQuote() {
-            const el = document.getElementById('current-quote');
-            if(!currentUser) { el.innerText = "Giriş yapıldığında yüklenecek..."; return; }
             const now = new Date();
             const key = `${String(now.getDate()).padStart(2,'0')}-${String(now.getMonth()+1).padStart(2,'0')}`;
-            if (key === '08-02') el.innerText = '"Seni çok seviyorum"';
-            else if (quotesPool[key]) el.innerText = `"${quotesPool[key]}"`;
-            else {
-                const keys = Object.keys(quotesPool).sort();
-                if(keys.length > 0) {
-                     const idx = Math.floor(now.getTime() / 86400000) % keys.length;
-                     el.innerText = `"${quotesPool[keys[idx]]}"`;
-                } else el.innerText = '"Seni her gün seviyorum..."';
+            const el = document.getElementById('daily-message-display');
+            
+            if (quotes[key]) {
+                el.innerText = `"${quotes[key]}"`;
+            } else {
+                const defaultQuotes = ["Seni çok seviyorum.", "İyi ki varsın.", "Her günüm seninle güzel."];
+                const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+                el.innerText = `"${defaultQuotes[dayOfYear % defaultQuotes.length]}"`;
             }
         }
 
-        function renderExpertSlider() {
-            const wrapper = document.getElementById('expert-slides');
-            if (!wrapper) return;
-            const today = new Date().getDate();
-            const startIdx = today % expertTips.length;
-            const reordered = [...expertTips.slice(startIdx), ...expertTips.slice(0, startIdx)];
-            wrapper.innerHTML = reordered.map(tip => `<div class="swiper-slide info-slide">"${tip}"</div>`).join('');
-            if (window.exSwiper) window.exSwiper.destroy();
-            window.exSwiper = new Swiper(".expertSwiper", { direction: 'vertical', slidesPerView: 1, mousewheel: true, pagination: { clickable: true } });
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.remove('opacity-0');
+            setTimeout(() => t.classList.add('opacity-0'), 3000);
         }
 
-        function renderChat(msgs) {
-            const div = document.getElementById('chat-box');
-            div.innerHTML = msgs.map(m => `
-                <div class="chat-bubble ${m.sender === currentUser ? 'sent' : 'received'}">
-                    <div class="font-bold text-[10px] opacity-70 mb-1">${m.sender}</div>
-                    <div>${m.text}</div>
-                    <div class="chat-meta">${new Date(m.createdAt).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'})} 
-                    ${m.sender === currentUser ? `<button onclick="window.deleteChat('${m.id}')" class="text-white font-bold ml-2">x</button>` : ''}</div>
-                </div>
-            `).join('');
-        }
-
-        function renderRequests() {
-            const ulIlker = document.getElementById('list-ilker');
-            const ulDerya = document.getElementById('list-derya');
-            const otherUser = currentUser === 'İlker' ? 'Derya' : 'İlker';
+        // --- DATA LISTENER START ---
+        
+        // 1. Mottos
+        onSnapshot(doc(db, 'artifacts', APP_ID, 'config', 'mottos'), (docSnap) => {
+            if(docSnap.exists() && docSnap.data().list) {
+                 mottos = docSnap.data().list;
+            } else {
+                 mottos = defaultMottos; // Veritabanı boşsa varsayılanları kullan
+            }
+            // Üstteki mottonun dönmesini sağla
+            const mottoEl = document.getElementById('top-motto');
+            mottoEl.innerText = `"${mottos[Math.floor(Math.random() * mottos.length)]}"`;
             
-            document.getElementById('incoming-title').innerText = `${otherUser}'nın Senden İstekleri (Zarf)`;
-            document.getElementById('outgoing-title').innerText = `Senin ${otherUser}'dan İsteklerin`;
-
-            const myIncoming = currentUser === 'İlker' ? requestsDerya : requestsIlker; // Derya yazdı, İlker okuyor
-            const myOutgoing = currentUser === 'İlker' ? requestsIlker : requestsDerya; // İlker yazdı, Derya okuyacak
-
-            // Gelenler (Zarf)
-            const listEl = document.getElementById('incoming-list');
-            listEl.innerHTML = myIncoming.map(r => `
-                 <div class="p-3 bg-indigo-50 rounded-xl text-sm text-indigo-900 border border-indigo-100 cursor-pointer group hover:bg-white transition-colors" onclick="this.querySelector('.req-txt').classList.toggle('hidden')">
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-xs">📩 Bir istek var</span>
-                        <span class="text-xs text-indigo-300">${new Date(r.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <div class="req-txt hidden mt-2 pt-2 border-t border-indigo-100 font-medium">${r.text}</div>
-                 </div>`).join('');
-
-            // Gidenler (Liste)
-            const listOutEl = document.getElementById('outgoing-list');
-            listOutEl.innerHTML = myOutgoing.map(r => `
-                <div class="flex justify-between p-2 text-sm text-slate-600 border-b border-rose-50 last:border-0">
-                    <span class="truncate">${r.text}</span>
-                    <button onclick="window.deleteRequest('${r.id}', '${currentUser}')" class="text-rose-300 font-bold ml-2 hover:text-rose-500">x</button>
-                </div>`).join('');
-        }
-
-        function renderMemorySlider() {
-            const wrapper = document.getElementById('memory-slides');
-            if (allMemories.length === 0) { wrapper.innerHTML = '<div class="swiper-slide bg-rose-50 flex items-center justify-center text-rose-400 font-bold text-sm">İlk anıyı ekle!</div>'; } 
-            else {
-                wrapper.innerHTML = allMemories.map(m => `
-                    <div class="swiper-slide">
-                        <div class="memory-card-wide w-full h-full group">
-                            <div class="memory-img-col">
-                                <img src="${m.foto_url || 'https://via.placeholder.com/400x300/e11d48/ffffff?text=ANI'}" alt="Anı Fotoğrafı">
-                            </div>
-                            <div class="memory-content-col" style="${!m.foto_url ? 'width: 100%;' : ''}">
-                                <span class="memory-date-badge">${new Date(m.tarih).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                                <p class="text-lg font-medium text-rose-900 leading-relaxed italic mb-4">"${m.aciklama}"</p>
-                                ${currentUser ? `<button onclick="window.deleteMemory('${m.id}')" class="absolute top-4 right-4 text-rose-300 hover:text-rose-600 font-bold text-xs uppercase opacity-0 group-hover:opacity-100 transition-opacity">SİL</button>` : ''}
-                            </div>
-                        </div>
+            // Admin listesini güncelle
+            if(currentUser === 'İlker') {
+                document.getElementById('admin-motto-list').innerHTML = mottos.map((m, i) => `
+                    <div class="flex justify-between text-[10px] bg-white p-1 rounded border border-slate-100">
+                        <span class="truncate w-32">${m}</span>
+                        <button onclick="window.deleteAdminMotto(${i})" class="text-rose-500 font-bold">x</button>
                     </div>
                 `).join('');
             }
-            if(window.memSwiper) window.memSwiper.destroy();
-            window.memSwiper = new Swiper(".memorySwiper", { 
-                effect: "coverflow", grabCursor: true, centeredSlides: true, slidesPerView: "auto",
-                coverflowEffect: { rotate: 50, stretch: 0, depth: 100, modifier: 1, slideShadows: false },
-                pagination: { clickable: true }
+        });
+
+        // 2. Expert Tips (İlişki Koçu)
+        onSnapshot(doc(db, 'artifacts', APP_ID, 'config', 'experts'), (docSnap) => {
+            let tips = defaultExperts;
+            if(docSnap.exists() && docSnap.data().list) {
+                tips = docSnap.data().list;
+            }
+            
+            const wrapper = document.getElementById('expert-slides-wrapper');
+            wrapper.innerHTML = tips.map(t => 
+                `<div class="swiper-slide flex items-center justify-center px-6"><p class="text-rose-800 italic font-medium leading-relaxed text-sm md:text-base">"${t}"</p></div>`
+            ).join('');
+            
+            if(window.exSwiper) window.exSwiper.destroy();
+            window.exSwiper = new Swiper(".expertSwiper", { direction: "vertical", autoplay: { delay: 4000 }, loop: true });
+        });
+
+        // 3. Günlük Sözler
+        onSnapshot(collection(db, 'artifacts', APP_ID, 'quotes'), (snap) => {
+            quotes = {};
+            snap.docs.forEach(d => quotes[d.id] = d.data().text);
+            displayDailyQuote();
+            
+            // Admin Listesi
+             if(currentUser === 'İlker') {
+                document.getElementById('admin-quote-list').innerHTML = Object.keys(quotes).sort().map(k => `
+                    <div class="flex justify-between text-[10px] bg-white p-1 rounded border border-rose-100">
+                        <span><b>${k}:</b> ${quotes[k].substring(0,15)}...</span>
+                        <button onclick="window.deleteAdminQuote('${k}')" class="text-rose-500 font-bold">x</button>
+                    </div>
+                `).join('');
+            }
+        });
+
+        // 4. Chat
+        onSnapshot(query(collection(db, 'artifacts', APP_ID, 'chat'), orderBy('createdAt', 'asc')), (snap) => {
+            const div = document.getElementById('chat-container');
+            div.innerHTML = snap.docs.map(d => {
+                const m = d.data();
+                const isMe = m.sender === currentUser;
+                return `
+                    <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                        <div class="${isMe ? 'bg-rose-500 text-white' : 'bg-white border border-rose-100 text-slate-600'} rounded-2xl px-4 py-2 text-xs md:text-sm max-w-[85%] shadow-sm">
+                            <p>${m.text}</p>
+                            <span class="text-[9px] opacity-70 block text-right mt-1">${new Date(m.createdAt).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'})}</span>
+                        </div>
+                    </div>`;
+            }).join('');
+            div.scrollTop = div.scrollHeight;
+        });
+
+        // 5. Talepler
+        onSnapshot(query(collection(db, 'artifacts', APP_ID, 'requests'), orderBy('createdAt', 'desc')), (snap) => {
+            if(!currentUser) return;
+            const myName = currentUser;
+            const incoming = [];
+            const outgoing = [];
+
+            snap.docs.forEach(d => {
+                const data = d.data();
+                if (data.to === myName) incoming.push(data);
+                if (data.from === myName) outgoing.push(data);
             });
+
+            const incDiv = document.getElementById('incoming-requests');
+            if(incoming.length === 0) incDiv.innerHTML = '<div class="text-[10px] text-slate-300 italic">Zarf kutun boş...</div>';
+            else {
+                incDiv.innerHTML = incoming.map(r => `
+                    <div class="envelope-card bg-white p-3 rounded-xl border border-rose-100 shadow-sm" onclick="alert('${r.text}')">
+                        <div class="font-bold text-xs text-rose-500 mb-1 flex items-center gap-2">📩 ${r.from}'dan Mesaj</div>
+                        <div class="text-[10px] text-slate-400">Okumak için tıkla</div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('outgoing-requests').innerHTML = outgoing.map(r => `
+                <div class="flex justify-between items-center text-[10px] text-slate-500 border-b border-slate-50 p-1">
+                    <span class="truncate w-3/4">${r.text}</span>
+                    <span class="text-rose-300">✓</span>
+                </div>
+            `).join('');
+        });
+
+        // 6. Anılar
+        onSnapshot(collection(db, 'artifacts', APP_ID, 'memories'), (snap) => {
+            if(snap.empty) {
+                // Boşsa varsayılan kartı bırak
+                return;
+            }
+            const mems = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            
+            // Sıralama Algoritması
+            const today = new Date();
+            mems.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                dateA.setFullYear(today.getFullYear());
+                dateB.setFullYear(today.getFullYear());
+                if (dateA < today) dateA.setFullYear(today.getFullYear() + 1);
+                if (dateB < today) dateB.setFullYear(today.getFullYear() + 1);
+                return (dateA - today) - (dateB - today);
+            });
+
+            const wrapper = document.getElementById('memory-wrapper');
+            wrapper.innerHTML = mems.map(m => `
+                <div class="swiper-slide">
+                    <div class="bg-white rounded-3xl overflow-hidden shadow-lg h-72 w-full relative group border border-rose-50">
+                        <img src="${m.image}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-rose-900/90 to-transparent p-6 text-white pt-12">
+                            <div class="font-bold text-lg font-romantic mb-1">${new Date(m.date).toLocaleDateString('tr-TR', {day:'numeric', month:'long', year:'numeric'})}</div>
+                            <p class="text-xs opacity-90 line-clamp-2 italic">"${m.desc}"</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            if(window.memSwiperInstance) window.memSwiperInstance.destroy();
+            window.memSwiperInstance = new Swiper(".memorySwiper", {
+                effect: "cards", grabCursor: true, centeredSlides: true, slidesPerView: "auto",
+            });
+        });
+
+        // SAYAÇLAR
+        const mDate = new Date('2019-10-27');
+        const tDate = new Date('2011-12-10');
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('counter-marriage').innerText = Math.floor((now - mDate) / 86400000);
+            document.getElementById('counter-meeting').innerText = Math.floor((now - tDate) / 86400000);
+        }, 1000);
+
+        // MÜZİK
+        window.player = null;
+        window.playlist = [
+             {id: 'hUB9M88kAdI', title: 'Hoş Geldin - Sezen Aksu'}, 
+             {id: '7VUu1TuDjRI', title: 'Beni Sen İnandır - Pinhani'}
+        ];
+        window.currentSong = 0;
+
+        window.onYouTubeIframeAPIReady = () => {
+             window.player = new YT.Player('yt-player', {
+                height: '0', width: '0',
+                videoId: window.playlist[0].id,
+                events: {
+                    'onReady': (event) => {
+                        document.getElementById('music-bar').classList.remove('translate-y-full');
+                        updateSongTitle();
+                         // Auto play is blocked by browsers usually, needs interaction
+                         document.body.addEventListener('click', () => {
+                             if(player.getPlayerState() !== 1) player.playVideo();
+                         }, { once: true });
+                    }
+                }
+            });
+        };
+        
+        window.nextSong = () => {
+            window.currentSong = (window.currentSong + 1) % window.playlist.length;
+            window.player.loadVideoById(window.playlist[window.currentSong].id);
+            updateSongTitle();
         }
         
-        function renderQuotesList() {
-            const list = document.getElementById('saved-quotes-list');
-            if(!list) return;
-            const keys = Object.keys(quotesPool).sort();
-            if(keys.length === 0) { list.innerHTML = '<p class="text-[10px] text-rose-300 italic p-4 text-center">Henüz özel gün eklenmemiş.</p>'; return; }
-            list.innerHTML = keys.map(dateKey => `<div class="p-2 border-b border-rose-50 flex justify-between"><span class="text-xs font-bold text-rose-500">${dateKey}</span><span class="text-xs truncate w-24">${quotesPool[dateKey]}</span><button onclick="window.deleteDailyQuote('${dateKey}')" class="text-rose-300 text-[10px]">SİL</button></div>`).join('');
-        }
-        function renderMottosList() {
-             const list = document.getElementById('motto-list');
-             list.innerHTML = mottosPool.map((m,i) => `<div class="p-2 border-b text-xs flex justify-between"><span class="truncate w-40">${m}</span> <button onclick="window.deleteMotto(${i})" class="text-rose-300">x</button></div>`).join('');
+        function updateSongTitle() {
+            document.getElementById('song-name').innerText = window.playlist[window.currentSong].title;
         }
 
-        // --- ACTIONS ---
-        window.sendChat = async () => {
-            const t = document.getElementById('note-text').value;
-            if(!t) return;
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chat'), { text: t, sender: currentUser, createdAt: Date.now() });
-            document.getElementById('note-text').value = '';
-        };
-        window.deleteChat = async (id) => { if(confirm('Sil?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat', id)); };
+        // Başlangıç Kontrolü
+        updateUI();
 
-        window.sendRequest = async () => {
-            const t = document.getElementById('req-input').value;
-            if(!t) return;
-            const col = currentUser === 'İlker' ? 'requests_ilker' : 'requests_derya';
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', col), { text: t, from: currentUser, createdAt: Date.now() });
-            document.getElementById('req-input').value = '';
-        };
-        window.deleteRequest = async (id, owner) => {
-            const col = owner === 'İlker' ? 'requests_ilker' : 'requests_derya';
-            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', col, id));
-        };
-
-        window.saveMemoryFromMain = async () => {
-             const file = document.getElementById('main-memory-photo').files[0];
-             const text = document.getElementById('main-memory-text').value;
-             const date = document.getElementById('main-memory-date').value;
-             if(!currentUser) return showToast("Giriş yapmalısınız!");
-             if(!text.trim() || !date) return showToast("Tarih ve açıklama şart!");
-
-             let photoUrl = null;
-             if(file) {
-                 if(file.size > 5 * 1024 * 1024) return showToast("Fotoğraf 5MB'dan büyük olamaz!");
-                 try { photoUrl = await new Promise(resolve => { const r = new FileReader(); r.onload = () => resolve(r.result); r.readAsDataURL(file); }); } 
-                 catch(e) { return showToast("Fotoğraf okunamadı."); }
-             }
-             await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'ani_kosesi'), { kimden: currentUser, aciklama: text, tarih: date, foto_url: photoUrl, createdAt: Date.now() });
-        };
-        window.deleteMemory = async (id) => { if(confirm('Sil?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ani_kosesi', id)); };
-
-        window.saveDailyQuote = async () => {
-             const d = document.getElementById('quote-date').value;
-             const t = document.getElementById('daily-quote-text').value;
-             if(!d) return;
-             const key = `${d.split('-')[2]}-${d.split('-')[1]}`;
-             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler', key), { text: t });
-             document.getElementById('daily-quote-text').value = '';
-        };
-        window.deleteDailyQuote = async (k) => await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gunluk_sozler', k));
-
-        window.addMotto = async () => {
-             const t = document.getElementById('new-motto-text').value;
-             if(!t) return;
-             const newList = [...mottosPool, t];
-             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'mottos'), { list: newList });
-             document.getElementById('new-motto-text').value = '';
-        };
-        window.deleteMotto = async (i) => {
-             const newList = mottosPool.filter((_, idx) => idx !== i);
-             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'mottos'), { list: newList });
-        };
-        window.seedMottos = async () => { if(!confirm('Varsayılanlar?')) return; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'mottos'), { list: defaultMottos }); };
-
-        window.openLoginModal = (name) => {
-            loginPendingUser = name;
-            document.getElementById('modal-user-name').innerText = name + " Girişi";
-            document.getElementById('modal-password').value = '';
-            document.getElementById('password-modal').classList.remove('hidden');
-        };
-        window.closeLoginModal = () => document.getElementById('password-modal').classList.add('hidden');
-        window.submitLogin = () => {
-            const pass = document.getElementById('modal-password').value;
-            const correctPass = loginPendingUser === 'Derya' ? '1881' : '1992';
-            if(pass === correctPass) {
-                currentUser = loginPendingUser;
-                localStorage.setItem('romantik_user', currentUser);
-                updateUI();
-                renderExpertTips();
-                window.closeLoginModal();
-                showToast("Hoş geldin " + currentUser);
-            } else {
-                showToast("Şifre Hatalı");
-            }
-        };
-
-        window.logout = () => { currentUser = null; localStorage.removeItem('romantik_user'); updateUI(); };
-        window.toggleAdmin = () => document.getElementById('admin-panel').classList.toggle('translate-x-full');
-        window.switchTab = (t) => {
-            document.getElementById('sidebar-quotes-content').className = t==='quotes'?'space-y-6':'hidden';
-            document.getElementById('sidebar-mottos-content').className = t==='mottos'?'space-y-6':'hidden';
-        };
-        function updateCounters() {
-             const now = new Date();
-             const dM = Math.floor((now - marriageDate) / (86400000));
-             const dT = Math.floor((now - meetingDate) / (86400000));
-             document.getElementById('marriage-counter').innerText = dM;
-             document.getElementById('meeting-counter').innerText = dT;
-        }
-
-        // YouTube
-        window.onYouTubeIframeAPIReady = () => { player = new YT.Player('player', { height:'0', width:'0', videoId:playlist[0].id, playerVars:{'autoplay':1,'loop':1,'playlist':playlist.map(p=>p.id).join(',')}, events: {'onReady': () => document.getElementById('music-player-bar').classList.add('translate-y-0') } }); };
-        window.togglePlay = () => { if(player.getPlayerState()===1) player.pauseVideo(); else player.playVideo(); };
-        window.nextSong = () => { currentSongIndex=(currentSongIndex+1)%playlist.length; player.loadVideoById(playlist[currentSongIndex].id); document.getElementById('music-title').innerText=playlist[currentSongIndex].title; };
-        window.prevSong = () => { currentSongIndex=(currentSongIndex-1+playlist.length)%playlist.length; player.loadVideoById(playlist[currentSongIndex].id); document.getElementById('music-title').innerText=playlist[currentSongIndex].title; };
-        window.playMusicOnFirstInteraction = () => { if (!musicStarted && player) { player.unMute(); player.playVideo(); musicStarted=true; document.body.onclick=null; } };
-
-        startApp();
     </script>
 </body>
 </html>
