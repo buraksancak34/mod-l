@@ -120,10 +120,9 @@
         .memory-date-badge {
             background: #fff1f2; color: #be123c;
             padding: 6px 16px; border-radius: 20px;
-            font-size: 12px; font-weight: 800;
-            display: inline-block; margin-bottom: 16px; width: fit-content;
+            font-size: 11px; font-weight: 800;
+            display: inline-block; margin-bottom: 8px;
             border: 1px solid #fecdd3;
-            letter-spacing: 0.5px;
         }
         
         .swiper-pagination-bullet-active { background: #e11d48 !important; }
@@ -137,10 +136,21 @@
             z-index: 5000; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); transition: transform 0.3s;
         }
         
+        /* Liste Stili */
+        .quote-list-item {
+            padding: 12px;
+            border-bottom: 1px solid #ffe4e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .quote-list-item:last-child { border-bottom: none; }
+        
         .tab-btn { padding: 8px 4px; font-weight: 800; font-size: 10px; border-radius: 10px; transition: all 0.2s; text-transform: uppercase; }
         .tab-btn.active { background: #e11d48; color: white; box-shadow: 0 4px 10px rgba(225, 29, 72, 0.2); }
         .tab-btn.inactive { background: #fff1f2; color: #fb7185; }
 
+        /* Motto Alanı */
         #motto-section {
             background: linear-gradient(to right, #fff1f2, #fff, #fff1f2);
             border-bottom: 1px solid #ffe4e6; padding: 12px; text-align: center;
@@ -267,7 +277,7 @@
                             <span class="text-rose-200">|</span>
                             <button onclick="window.login('İlker')" id="btn-login-ilker" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2 underline-offset-4 cursor-pointer">İlker</button>
                         </div>
-                        <button onclick="window.toggleAdmin()" id="manage-btn" class="hidden-mode btn-love px-8 py-2.5 text-[10px] uppercase shadow-lg ml-4">🛠️ Yönetim</button>
+                        <button onclick="window.toggleAdmin()" id="manage-btn" class="hidden-mode btn-love px-8 py-2.5 text-[10px] uppercase shadow-lg ml-4">🛠️ Panel</button>
                         <button onclick="window.logout()" id="logout-btn" class="hidden-mode text-[10px] font-black uppercase text-rose-300 ml-4 cursor-pointer">Çıkış</button>
                     </div>
 
@@ -414,7 +424,7 @@
 
         const appId = 'derya-ilker-love-v5'; // Versiyonu yükselttik (Temiz sayfa)
         let currentUser = null; 
-        let quotesPool = {}, allMemories = [], mottosPool = [], requestsIlker = [], requestsDerya = [];
+        let allNotes = [], quotesPool = {}, allMemories = [], mottosPool = [], requestsIlker = [], requestsDerya = [];
         let db, player, musicStarted = false, expertSwiper;
 
         const expertTips = [
@@ -503,10 +513,12 @@
             const wrapper = document.getElementById('expert-slides');
             if (!wrapper) return;
             const today = new Date().getDate();
-            const startIdx = today % expertTips.length;
-            const reordered = [...expertTips.slice(startIdx), ...expertTips.slice(0, startIdx)];
-            wrapper.innerHTML = reordered.map(tip => `<div class="swiper-slide info-slide">"${tip}"</div>`).join('');
-            if (window.exSwiper) window.exSwiper.destroy();
+            const start = today % expertTips.length;
+            const sorted = [...expertTips.slice(start), ...expertTips.slice(0, start)];
+            
+            wrapper.innerHTML = sorted.map(t => `<div class="swiper-slide info-slide">"${t}"</div>`).join('');
+            
+            if(window.exSwiper) window.exSwiper.destroy();
             window.exSwiper = new Swiper(".expertSwiper", { direction: 'vertical', slidesPerView: 1, pagination: { clickable: true } });
         }
 
@@ -582,8 +594,10 @@
         
         function renderQuotesList() {
             const list = document.getElementById('saved-quotes-list');
+            if(!list) return;
             const keys = Object.keys(quotesPool).sort();
-            list.innerHTML = keys.map(k => `<div class="p-2 border-b text-xs flex justify-between"><span class="font-bold text-rose-500">${k}</span> <span class="truncate w-24">${quotesPool[k]}</span> <button onclick="window.deleteDailyQuote('${k}')" class="text-rose-300">x</button></div>`).join('');
+            if(keys.length === 0) { list.innerHTML = '<p class="text-[10px] text-rose-300 italic p-4 text-center">Henüz özel gün eklenmemiş.</p>'; return; }
+            list.innerHTML = keys.map(dateKey => `<div class="p-2 border-b border-rose-50 flex justify-between"><span class="text-xs font-bold text-rose-500">${dateKey}</span><span class="text-xs truncate w-24">${quotesPool[dateKey]}</span><button onclick="window.deleteDailyQuote('${dateKey}')" class="text-rose-300 text-[10px]">SİL</button></div>`).join('');
         }
         function renderMottosList() {
              const list = document.getElementById('motto-list');
@@ -616,17 +630,9 @@
              const file = document.getElementById('main-memory-photo').files[0];
              const text = document.getElementById('main-memory-text').value;
              const date = document.getElementById('main-memory-date').value;
-             if(!text || !date) return showToast("Tarih ve hikaye şart!");
-             
              let photoUrl = null;
-             if(file) {
-                 if(file.size > 5 * 1024 * 1024) return showToast("Fotoğraf 5MB'dan küçük olmalı!");
-                 try { photoUrl = await new Promise(r => { const rd = new FileReader(); rd.onload=()=>r(rd.result); rd.readAsDataURL(file); }); } 
-                 catch(e) { return showToast("Fotoğraf hatası."); }
-             }
+             if(file) { photoUrl = await new Promise(resolve => { const r = new FileReader(); r.onload = () => resolve(r.result); r.readAsDataURL(file); }); }
              await addDoc(collection(db, 'artifacts', appId, 'ani_kosesi'), { kimden: currentUser, aciklama: text, tarih: date, foto_url: photoUrl, createdAt: Date.now() });
-             document.getElementById('main-memory-text').value = '';
-             showToast("Anı eklendi!");
         };
         window.deleteMemory = async (id) => { if(confirm('Sil?')) await deleteDoc(doc(db, 'artifacts', appId, 'ani_kosesi', id)); };
 
@@ -636,8 +642,6 @@
              if(!d) return;
              const key = `${d.split('-')[2]}-${d.split('-')[1]}`;
              await setDoc(doc(db, 'artifacts', appId, 'gunluk_sozler', key), { text: t });
-             document.getElementById('daily-quote-text').value = '';
-             showToast("Kaydedildi!");
         };
         window.deleteDailyQuote = async (k) => await deleteDoc(doc(db, 'artifacts', appId, 'gunluk_sozler', k));
 
@@ -674,8 +678,10 @@
              const now = new Date();
              const dM = Math.floor((now - marriageDate) / (86400000));
              const dT = Math.floor((now - meetingDate) / (86400000));
-             document.getElementById('marriage-counter').innerText = dM;
-             document.getElementById('meeting-counter').innerText = dT;
+             const elM = document.getElementById('marriage-counter');
+             const elT = document.getElementById('meeting-counter');
+             if(elM) elM.innerText = dM;
+             if(elT) elT.innerText = dT;
         }
 
         // YouTube
