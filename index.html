@@ -62,18 +62,11 @@
             z-index: 1000000; opacity: 0; transition: opacity 0.3s; pointer-events: none;
         }
 
-        /* Notlar - Net Kırmızı */
         .important-note {
             color: #ef4444 !important;
             font-weight: 800 !important;
         }
 
-        .countdown-item {
-            background: white; padding: 6px 12px; border-radius: 12px;
-            border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 8px;
-        }
-
-        /* 365 Gün Sözü Animasyonu */
         #daily-quote-area {
             min-height: 140px;
             display: flex;
@@ -85,9 +78,9 @@
 </head>
 <body class="antialiased">
 
-    <div id="toast">Başarıyla kaydedildi!</div>
+    <div id="toast">İşlem başarılı!</div>
 
-    <!-- Editör Paneli (Sadece İlker'e Özel) -->
+    <!-- Editör Paneli -->
     <div id="admin-panel" class="fixed top-0 right-0 h-full w-80 admin-sidebar translate-x-full overflow-y-auto p-8 border-l border-rose-100">
         <div class="flex justify-between items-center mb-8">
             <h2 class="text-xl font-black text-rose-800 flex items-center gap-2">🛠️ Editör Paneli</h2>
@@ -99,17 +92,15 @@
             <button onclick="window.switchTab('quotes')" id="tab-quotes" class="tab-btn inactive flex-1 text-[10px] font-bold py-2 rounded-xl">365 GÜN</button>
         </div>
         
-        <!-- Not Bırakma -->
         <div id="sidebar-notes-content" class="space-y-4">
-            <h3 class="text-rose-600 text-[10px] font-black uppercase">Derya İçin Not Bırak</h3>
-            <textarea id="note-text" placeholder="Derya'ya ne söylemek istersin?" class="custom-input h-32"></textarea>
+            <h3 class="text-rose-600 text-[10px] font-black uppercase" id="note-target-label">Not Bırak</h3>
+            <textarea id="note-text" placeholder="Mesajını yaz..." class="custom-input h-32"></textarea>
             <button onclick="window.addNote()" class="w-full py-4 btn-love text-sm">NOTU BIRAK</button>
         </div>
 
-        <!-- 365 Gün Yönetimi -->
         <div id="sidebar-quotes-content" class="hidden space-y-4">
             <h3 class="text-rose-600 text-[10px] font-black uppercase">365 Günlük Sözler</h3>
-            <p class="text-[9px] text-rose-400 italic">Her satıra bir söz yaz. Takvim gününe göre otomatik değişir.</p>
+            <p class="text-[9px] text-rose-400 italic">Her satıra bir söz yazın.</p>
             <textarea id="quotes-bulk" placeholder="Sözleri buraya alt alta girin..." class="custom-input h-64 text-xs"></textarea>
             <button onclick="window.saveQuotes()" class="w-full py-4 btn-love text-sm">LİSTEYİ GÜNCELLE</button>
         </div>
@@ -132,10 +123,9 @@
                             <button onclick="window.login('İlker')" id="btn-ilker" class="text-[10px] font-black uppercase tracking-widest text-rose-500 underline decoration-2">İlker</button>
                         </div>
                         <button onclick="window.toggleAdmin()" id="manage-btn" class="hidden-mode btn-love px-8 py-2.5 text-[10px] uppercase shadow-lg ml-4">🛠️ Panel</button>
-                        <button onclick="window.logout()" id="logout-btn" class="hidden-mode text-[10px] font-black uppercase text-rose-300 ml-4">Çıkış</button>
+                        <button onclick="window.logout()" id="logout-btn" class="hidden-mode text-[10px] font-black uppercase text-rose-300 ml-4 cursor-pointer">Çıkış</button>
                     </div>
 
-                    <!-- Günlük Mesaj Alanı -->
                     <div id="daily-quote-area" class="max-w-2xl w-full glass-card p-10 rounded-[3rem] border-rose-200">
                         <div id="quote-display-box">
                             <h4 class="text-[9px] font-black text-rose-300 uppercase tracking-[4px] mb-4">Günün Kalp Atışı</h4>
@@ -145,7 +135,6 @@
                 </div>
             </div>
 
-            <!-- Sayaçlar -->
             <div class="flex flex-col gap-6 w-full md:w-[350px]">
                 <div class="glass-card p-10 rounded-[3rem] text-center relative overflow-hidden">
                     <div class="absolute -top-10 -right-10 text-rose-100 text-9xl opacity-20">♥</div>
@@ -156,7 +145,7 @@
 
                 <div class="glass-card p-6 rounded-[2.5rem] border-rose-50 text-center">
                     <div class="grid grid-cols-1 gap-2">
-                        <p class="text-[9px] text-rose-300 font-black uppercase tracking-widest">İlk Tanışma: 10 Aralık 2011</p>
+                        <p class="text-[9px] text-rose-300 font-black uppercase tracking-widest">Tanışma: 10 Aralık 2011</p>
                         <p id="meeting-counter" class="text-2xl font-black text-rose-400">0</p>
                         <p class="text-[9px] text-rose-300 font-black uppercase">Gündür Beraberiz</p>
                     </div>
@@ -164,7 +153,6 @@
             </div>
         </header>
 
-        <!-- Notlar Bölümü -->
         <section id="notes-section" class="mt-20">
             <h2 id="notes-title" class="text-3xl font-black text-rose-900 uppercase mb-8 px-4">📍 Özel Notlar</h2>
             <div class="glass-card rounded-[3rem] overflow-hidden border-none shadow-xl min-h-[200px]">
@@ -194,7 +182,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -208,7 +196,7 @@
         };
 
         const appId = 'derya-ilker-secret-v1';
-        let currentUser = null; // 'Derya' or 'İlker'
+        let currentUser = null;
         let notes = [], allQuotes = [];
 
         const meetingDate = new Date('2011-12-10');
@@ -250,13 +238,11 @@
         }
 
         const setupDataListeners = (db) => {
-            // Notları Dinle
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'ozel_notlar'), (snap) => {
                 notes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderNotes();
             });
 
-            // 365 Sözü Dinle
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'quotes'), (snap) => {
                 if(snap.exists()) {
                     allQuotes = snap.data().list || [];
@@ -320,14 +306,18 @@
             const manageBtn = document.getElementById('manage-btn');
             const logoutBtn = document.getElementById('logout-btn');
             const noteTitle = document.getElementById('notes-title');
+            const noteLabel = document.getElementById('note-target-label');
 
             if (currentUser) {
                 modeText.innerText = currentUser;
                 logoutBtn.classList.remove('hidden-mode');
-                // Sadece İlker panel görebilir
-                if (currentUser === 'İlker') manageBtn.classList.remove('hidden-mode');
-                else manageBtn.classList.add('hidden-mode');
-                
+                if (currentUser === 'İlker') {
+                    manageBtn.classList.remove('hidden-mode');
+                    noteLabel.innerText = "Derya İçin Not Bırak";
+                } else {
+                    manageBtn.classList.remove('hidden-mode');
+                    noteLabel.innerText = "İlker İçin Not Bırak";
+                }
                 noteTitle.innerText = currentUser === 'İlker' ? "📍 Derya'dan Mesajlar" : "📍 İlker'den Mesajlar";
             } else {
                 modeText.innerText = "Gözlemci";
@@ -346,7 +336,6 @@
                 return;
             }
 
-            // Filtreleme: Derya girerse İlker'in notlarını görür, İlker girerse Derya'nınkini
             const targetSender = currentUser === 'İlker' ? 'Derya' : 'İlker';
             const visibleNotes = notes.filter(n => n.sender === targetSender).sort((a,b) => b.createdAt - a.createdAt);
 
@@ -361,7 +350,7 @@
                     <td class="px-8 py-6 font-black text-rose-600">${n.sender}</td>
                     <td class="px-8 py-6 important-note">${n.text}</td>
                     <td class="px-8 py-6 text-right">
-                        ${currentUser === n.receiver ? `<button onclick="window.deleteNote('${n.id}')" class="text-rose-200 hover:text-rose-500 font-bold">SİL</button>` : '🔒'}
+                        <button onclick="window.deleteNote('${n.id}')" class="text-rose-200 hover:text-rose-500 font-bold">SİL</button>
                     </td>
                 </tr>
             `).join('');
@@ -381,11 +370,12 @@
             });
             
             document.getElementById('note-text').value = '';
-            showToast("Notun başarıyla iletildi!");
+            showToast("Mesajın başarıyla iletildi!");
             if(!document.getElementById('admin-panel').classList.contains('translate-x-full')) window.toggleAdmin();
         };
 
         window.saveQuotes = async () => {
+            if(currentUser !== 'İlker') return alert("Bu yetki sadece İlker'e aittir.");
             const db = getFirestore();
             const list = document.getElementById('quotes-bulk').value.split('\n').filter(s => s.trim() !== "");
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'quotes'), { list });
