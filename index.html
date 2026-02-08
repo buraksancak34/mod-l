@@ -29,10 +29,12 @@
         body { background: linear-gradient(135deg, #f8fafc 0%, #fff1f2 100%); min-height: 100vh; overflow-x: hidden; }
         .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 32px rgba(225, 29, 72, 0.05); border-radius: 1.5rem; }
         
-        /* Bulanıklık Efekti (Daha güçlü) */
-        .blur-lock { filter: blur(12px); pointer-events: none; user-select: none; transition: filter 0.8s ease; }
-        .unlocked { filter: blur(0); pointer-events: auto; transition: filter 0.8s ease; }
-        
+        /* Geçiş Efektleri */
+        .blur-lock { filter: blur(15px); pointer-events: none; user-select: none; transition: filter 0.5s ease; }
+        .unlocked { filter: blur(0); pointer-events: auto; transition: filter 0.5s ease; }
+        .hidden-opacity { opacity: 0; pointer-events: none; height: 0; overflow: hidden; }
+        .visible-opacity { opacity: 1; pointer-events: auto; height: auto; }
+
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #fda4af; border-radius: 4px; }
         
@@ -42,13 +44,18 @@
         }
         .postal-envelope:hover { transform: translateX(5px); box-shadow: 0 5px 15px rgba(225, 29, 72, 0.1); background: #fff0f3; }
         .postal-envelope::after { content: '💌'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; opacity: 0.5; }
+        
+        /* Giden zarf rengi farklı olsun */
+        .postal-envelope.outgoing { border-left-color: #6366f1; } 
 
         .swiper-button-next, .swiper-button-prev { color: #e11d48 !important; background: white; width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .tab-btn.active { background-color: #e11d48; color: white; }
     </style>
 </head>
 <body class="text-slate-800 pb-24">
 
-    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-rose-900 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity duration-300 z-[99999] text-sm font-bold pointer-events-none"></div>
+    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity duration-300 z-[99999] text-sm font-bold pointer-events-none"></div>
 
     <div class="bg-white/80 border-b border-rose-100 py-3 text-center sticky top-0 z-40 backdrop-blur shadow-sm">
         <p id="top-motto" class="text-xs md:text-sm font-bold text-rose-500 tracking-widest uppercase animate-pulse">Yükleniyor...</p>
@@ -56,52 +63,59 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <header class="flex flex-col md:flex-row justify-between items-center mb-12 gap-8">
-            <div class="text-center md:text-left">
-                <h1 class="font-romantic text-6xl md:text-7xl text-rose-600">İlker <span class="text-4xl text-pink-400">&</span> Derya</h1>
-                <p class="text-slate-400 font-medium mt-2 tracking-wide">Bizim Dünyamız</p>
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
+            <div class="text-center md:text-left flex-1">
+                <h1 class="font-romantic text-7xl md:text-8xl text-rose-600 mb-2">Derya ve İlker</h1>
+                <p class="text-rose-400 font-medium tracking-wide text-lg">14 yıldır aynı gökyüzüne bakmak... <span class="text-rose-600">♥</span></p>
             </div>
             
-            <div class="flex gap-4">
-                <div class="glass-card p-4 text-center min-w-[140px]">
-                    <div class="text-[10px] text-rose-400 font-black uppercase">Evlilik</div>
-                    <div id="counter-marriage" class="text-2xl font-black text-slate-700">...</div>
+            <div class="flex flex-col gap-4 w-full md:w-auto">
+                <div class="glass-card p-4 text-center min-w-[200px] border-l-4 border-rose-400">
+                    <div class="text-[10px] text-rose-400 font-black uppercase tracking-widest mb-1">Evlilik Yolculuğumuz</div>
+                    <div id="counter-marriage" class="text-3xl font-black text-slate-700 leading-none">...</div>
+                    <div class="text-[10px] text-slate-400 font-bold uppercase mt-1">Muhteşem Gün</div>
                 </div>
-                <div class="glass-card p-4 text-center min-w-[140px]">
-                    <div class="text-[10px] text-rose-400 font-black uppercase">Tanışma</div>
-                    <div id="counter-meeting" class="text-2xl font-black text-slate-700">...</div>
+                <div class="glass-card p-4 text-center min-w-[200px] border-l-4 border-pink-400">
+                    <div class="text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1">Tanışma: 10 Aralık 2011</div>
+                    <div id="counter-meeting" class="text-3xl font-black text-slate-700 leading-none">...</div>
+                    <div class="text-[10px] text-slate-400 font-bold uppercase mt-1">Gündür Beraberiz</div>
                 </div>
             </div>
         </header>
 
         <section class="mb-16">
-            <div class="glass-card max-w-3xl mx-auto p-10 text-center relative overflow-hidden">
-                <h2 class="text-xs font-black text-rose-400 uppercase tracking-[0.3em] mb-6">Günün Kalp Atışı</h2>
-                <p id="daily-message-display" class="font-romantic text-3xl md:text-4xl text-slate-700 leading-normal">"Giriş yapıldığında kalbimiz konuşacak..."</p>
-                <div class="mt-8">
-                    <button onclick="openLoginModal()" id="login-trigger-btn" class="bg-rose-500 text-white px-8 py-3 rounded-full text-xs font-bold uppercase shadow-lg hover:bg-rose-600 transition-all">Giriş Yap</button>
-                    <div id="user-info-panel" class="hidden flex flex-col items-center gap-2">
-                        <div class="flex items-center gap-2">
-                            <span id="welcome-text" class="text-sm font-bold text-rose-600"></span>
-                            <button onclick="toggleAdmin()" id="admin-btn" class="hidden bg-slate-200 text-slate-600 w-6 h-6 rounded-full flex items-center justify-center text-xs hover:bg-rose-100">⚙️</button>
+            <div class="glass-card max-w-3xl mx-auto p-12 text-center relative overflow-hidden group hover:shadow-xl transition-shadow">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-200 via-pink-400 to-rose-200"></div>
+                <h2 class="text-xs font-black text-rose-400 uppercase tracking-[0.4em] mb-8">GÜNÜN KALP ATIŞI</h2>
+                <p id="daily-message-display" class="font-romantic text-3xl md:text-5xl text-slate-700 leading-normal transition-all">"Giriş yapıldığında kalbimiz konuşacak..."</p>
+                
+                <div class="mt-10" id="auth-container">
+                    <button onclick="openLoginModal()" id="login-trigger-btn" class="bg-rose-500 text-white px-10 py-3 rounded-full text-xs font-bold uppercase shadow-lg hover:bg-rose-600 transition-all hover:scale-105">Giriş Yap</button>
+                    
+                    <div id="user-info-panel" class="hidden flex flex-col items-center gap-3 animate-fade-in">
+                        <div class="flex items-center gap-3 bg-rose-50 px-4 py-1 rounded-full border border-rose-100">
+                            <span id="welcome-text" class="text-xs font-bold text-rose-600 uppercase tracking-wider"></span>
+                            <button onclick="toggleAdmin()" id="admin-btn" class="hidden text-slate-400 hover:text-rose-500 text-lg" title="Yönetim Paneli">⚙️</button>
                         </div>
-                        <button onclick="logout()" class="text-[10px] text-slate-400 underline">Çıkış</button>
+                        <button onclick="logout()" class="text-[10px] text-slate-400 underline hover:text-rose-500">Çıkış</button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <div id="secure-layer" class="relative transition-all duration-1000 blur-lock">
+        <div id="secure-layer" class="relative blur-lock">
+            
             <div id="lock-overlay" class="absolute inset-0 z-30 flex flex-col items-center justify-center pt-20">
-                <div class="text-6xl mb-4 opacity-50">🔒</div>
+                <div class="text-6xl mb-4 opacity-50 animate-pulse">🔒</div>
                 <p class="text-rose-900 font-bold bg-white/50 px-4 py-2 rounded-xl backdrop-blur">Özel İçerik</p>
             </div>
 
             <div class="mb-16 relative">
-                <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-rose-100 text-center max-w-2xl mx-auto transform hover:-translate-y-1 transition-transform duration-300">
-                    <div class="text-4xl mb-4 animate-bounce">💡</div>
+                <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-rose-100 text-center max-w-2xl mx-auto transform hover:-translate-y-1 transition-transform duration-300 relative">
+                    <button onclick="openNoteModal()" class="absolute top-4 right-4 bg-rose-50 text-rose-500 w-8 h-8 rounded-full flex items-center justify-center font-bold hover:bg-rose-100" title="Yeni Tavsiye Ekle">+</button>
+                    <div class="text-4xl mb-4">💡</div>
                     <h3 class="text-xs font-black text-rose-400 uppercase tracking-widest mb-4">Günün İlişki Tavsiyesi</h3>
-                    <p id="daily-relationship-note" class="text-xl text-slate-700 font-medium italic leading-relaxed">"Birbirinize sarılmayı unutmayın..."</p>
+                    <p id="daily-relationship-note" class="text-xl text-slate-700 font-medium italic leading-relaxed">...</p>
                 </div>
             </div>
 
@@ -117,18 +131,16 @@
 
                 <div class="glass-card p-6 h-[500px] flex flex-col">
                     <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">💫 Kalpten İstekler</h3>
-                    
                     <div class="flex-1 overflow-y-auto mb-4 custom-scroll pr-2">
                         <div class="mb-6">
-                            <h4 class="text-[10px] font-black text-rose-400 uppercase mb-3 sticky top-0 bg-white/50 backdrop-blur z-10 py-1">Sana Gelen Zarflar</h4>
+                            <h4 class="text-[10px] font-black text-rose-400 uppercase mb-3 sticky top-0 bg-white/50 backdrop-blur z-10 py-1">Gelen Kutusu</h4>
                             <div id="incoming-requests" class="space-y-3"></div>
                         </div>
                         <div>
-                            <h4 class="text-[10px] font-black text-slate-400 uppercase mb-2 sticky top-0 bg-white/50 backdrop-blur z-10 py-1">Gönderilenler</h4>
-                            <div id="outgoing-requests" class="space-y-1"></div>
+                            <h4 class="text-[10px] font-black text-indigo-400 uppercase mb-2 sticky top-0 bg-white/50 backdrop-blur z-10 py-1">Giden Kutusu</h4>
+                            <div id="outgoing-requests" class="space-y-3"></div>
                         </div>
                     </div>
-
                     <div class="bg-pink-50 p-2 rounded-xl border border-pink-100 flex gap-2">
                         <input type="text" id="request-input" class="flex-1 bg-transparent text-sm outline-none px-2 placeholder-pink-300 text-pink-900" placeholder="Bir dilek tut... (Enter)">
                         <button onclick="sendRequest()" class="bg-pink-500 text-white px-4 rounded-lg text-sm font-bold">+</button>
@@ -142,7 +154,7 @@
                     <button onclick="toggleMemoryForm()" class="text-xs bg-white border border-rose-200 text-rose-500 px-4 py-2 rounded-full font-bold shadow-sm hover:bg-rose-50">+ ANI EKLE</button>
                 </div>
 
-                <div id="memory-form" class="hidden mb-6 bg-white p-6 rounded-3xl shadow-xl border border-rose-100">
+                <div id="memory-form" class="hidden mb-6 bg-white p-6 rounded-3xl shadow-xl border border-rose-100 animate-fade-in">
                     <div class="grid grid-cols-1 gap-4">
                         <input type="date" id="mem-date" class="w-full text-sm p-3 bg-slate-50 rounded-xl outline-none border border-slate-100">
                         <textarea id="mem-desc" placeholder="Bu anın hikayesi..." class="w-full text-sm p-3 bg-slate-50 rounded-xl outline-none h-20 resize-none border border-slate-100"></textarea>
@@ -182,26 +194,59 @@
         <audio id="audio-element"></audio>
     </div>
 
-    <div id="admin-sidebar" class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-[10000] p-6 overflow-y-auto">
-        <h2 class="font-bold text-slate-800 text-lg mb-8 flex justify-between">Yönetim <button onclick="toggleAdmin()">&times;</button></h2>
+    <div id="admin-sidebar" class="fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-[10000] flex flex-col">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h2 class="font-bold text-slate-800 text-lg">Yönetim Paneli</h2>
+            <button onclick="toggleAdmin()" class="text-2xl text-slate-300 hover:text-rose-500">&times;</button>
+        </div>
         
-        <div class="bg-violet-50 p-4 rounded-2xl mb-8 border border-violet-100">
-            <label class="text-[10px] font-black text-violet-500 block mb-2 uppercase">Şarkı Ekle</label>
-            <input type="text" id="song-title" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-violet-200" placeholder="Şarkı Adı">
-            <input type="text" id="song-url" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-violet-200" placeholder="MP3 Linki (URL)">
-            <button onclick="addSongToPlaylist()" class="w-full bg-violet-600 text-white py-2 rounded-lg text-xs font-bold shadow-md">LİSTEYE EKLE</button>
-            <div id="admin-playlist" class="mt-4 space-y-1 max-h-32 overflow-y-auto"></div>
+        <div class="flex border-b border-slate-100">
+            <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 py-3 text-xs font-bold uppercase text-slate-500 tab-btn active">Günlük İşler</button>
+            <button onclick="switchTab('settings')" id="tab-settings" class="flex-1 py-3 text-xs font-bold uppercase text-slate-500 tab-btn">Ayarlar</button>
         </div>
 
-        <div class="space-y-4">
-            <button onclick="uploadBulkQuotes()" class="w-full bg-indigo-600 text-white py-3 rounded-lg text-xs font-bold shadow-md hover:bg-indigo-700">🚀 1 YILLIK SÖZLERİ YÜKLE</button>
-            <button onclick="uploadBulkMottos()" class="w-full bg-emerald-600 text-white py-3 rounded-lg text-xs font-bold shadow-md hover:bg-emerald-700">🌿 50 MOTTOLARI YÜKLE</button>
-            <button onclick="uploadBulkNotes()" class="w-full bg-amber-600 text-white py-3 rounded-lg text-xs font-bold shadow-md hover:bg-amber-700">💡 135+ İLİŞKİ NOTU YÜKLE</button>
+        <div class="flex-1 overflow-y-auto p-6">
+            <div id="content-daily" class="space-y-8">
+                <div class="bg-rose-50 p-4 rounded-2xl">
+                    <label class="text-[10px] font-black text-rose-400 block mb-2 uppercase">Güne Özel Mesaj Ekle/Güncelle</label>
+                    <input type="date" id="admin-quote-date" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-rose-100">
+                    <textarea id="admin-quote-text" class="w-full bg-white p-2 rounded-lg mb-2 text-xs h-16 border border-rose-100" placeholder="Mesaj..."></textarea>
+                    <button onclick="saveAdminQuote()" class="w-full bg-rose-500 text-white py-2 rounded-lg text-xs font-bold shadow-md">KAYDET</button>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl">
+                    <label class="text-[10px] font-black text-slate-400 block mb-2 uppercase">Yeni Motto Ekle</label>
+                    <input type="text" id="admin-motto-text" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-slate-200" placeholder="Motto...">
+                    <button onclick="saveAdminMotto()" class="w-full bg-slate-700 text-white py-2 rounded-lg text-xs font-bold shadow-md">EKLE</button>
+                </div>
+
+                <div class="border-t border-slate-100 pt-4">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase mb-2">Kayıtlı Günler</h4>
+                    <div id="admin-quote-list" class="max-h-48 overflow-y-auto space-y-1"></div>
+                </div>
+            </div>
+
+            <div id="content-settings" class="space-y-8 hidden">
+                <div class="bg-violet-50 p-4 rounded-2xl border border-violet-100">
+                    <label class="text-[10px] font-black text-violet-500 block mb-2 uppercase">Şarkı Ekle (URL)</label>
+                    <input type="text" id="song-title" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-violet-200" placeholder="Şarkı Adı">
+                    <input type="text" id="song-url" class="w-full bg-white p-2 rounded-lg mb-2 text-xs border border-violet-200" placeholder="MP3 Linki">
+                    <button onclick="addSongToPlaylist()" class="w-full bg-violet-600 text-white py-2 rounded-lg text-xs font-bold shadow-md">LİSTEYE EKLE</button>
+                    <div id="admin-playlist" class="mt-4 space-y-1 max-h-32 overflow-y-auto"></div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-4 space-y-4">
+                    <p class="text-[9px] text-slate-400 text-center uppercase tracking-widest">Veritabanı Araçları</p>
+                    <button onclick="uploadBulkQuotes()" class="w-full bg-indigo-50 text-indigo-600 py-3 rounded-lg text-xs font-bold border border-indigo-100 hover:bg-indigo-100">1 Yıllık Sözleri Yükle</button>
+                    <button onclick="uploadBulkMottos()" class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-lg text-xs font-bold border border-emerald-100 hover:bg-emerald-100">Mottoları Yükle</button>
+                    <button onclick="uploadBulkNotes()" class="w-full bg-amber-50 text-amber-600 py-3 rounded-lg text-xs font-bold border border-amber-100 hover:bg-amber-100">İlişki Notlarını Yükle</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="login-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] hidden flex items-center justify-center">
-        <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-80 text-center relative">
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-80 text-center relative animate-bounce-in">
             <button onclick="document.getElementById('login-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-300 text-xl">&times;</button>
             <h3 class="text-xl font-romantic text-rose-600 mb-6">Hoş Geldiniz</h3>
             <input type="password" id="password-input" class="w-full text-center text-lg tracking-[5px] p-3 border-b-2 border-rose-100 outline-none focus:border-rose-500 mb-6 font-bold text-rose-900" placeholder="****">
@@ -210,7 +255,7 @@
     </div>
 
     <div id="envelope-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] p-8 max-w-md w-full relative shadow-2xl animate-bounce-in border-4 border-rose-100">
+        <div class="bg-white rounded-[2rem] p-8 max-w-md w-full relative shadow-2xl border-4 border-rose-100">
             <button onclick="document.getElementById('envelope-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-300 hover:text-rose-500 text-2xl">&times;</button>
             <div class="text-center">
                 <div class="text-4xl mb-4">💌</div>
@@ -224,10 +269,18 @@
         </div>
     </div>
 
+    <div id="note-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[10000] hidden flex items-center justify-center">
+        <div class="bg-white p-6 rounded-3xl shadow-xl w-80 relative">
+            <button onclick="document.getElementById('note-modal').classList.add('hidden')" class="absolute top-3 right-3 text-slate-300">&times;</button>
+            <h3 class="font-bold text-rose-600 mb-4 text-center">İlişki Notu Ekle</h3>
+            <textarea id="note-input" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm h-24 mb-4 outline-none focus:border-rose-400" placeholder="Bir tavsiye yaz..."></textarea>
+            <button onclick="saveRelationshipNote()" class="w-full bg-rose-500 text-white py-2 rounded-xl font-bold text-sm">EKLE</button>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     
     <script>
-        // --- 1. FIREBASE BAŞLATMA ---
         const firebaseConfig = {
             apiKey: "AIzaSyCbIuOJeKNpJToMg2-PsblLtue-mzElUQY", 
             authDomain: "tezz-95f0d.firebaseapp.com",
@@ -238,33 +291,33 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        // GLOBAL VERİTABANI KÖKÜ (Senin veritabanı odan)
         const DB_ROOT = db.collection('artifacts').doc('derya-ilker-love-v3');
 
-        // --- 2. DEĞİŞKENLER ---
         let currentUser = localStorage.getItem('bizim_user');
         let mottos = ["Aile, sevginin başladığı yerdir."];
         let quotes = {};
-        
-        // Müzik
         let playlist = [];
         let currentSongIndex = 0;
         const audio = document.getElementById('audio-element');
 
-        // --- 3. FONKSİYONLAR ---
-
-        // UI & GÜVENLİK
+        // --- UI FUNCTIONS ---
         function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); }
+        function openNoteModal() { document.getElementById('note-modal').classList.remove('hidden'); }
         function toggleAdmin() { document.getElementById('admin-sidebar').classList.toggle('translate-x-full'); }
         function toggleMemoryForm() { document.getElementById('memory-form').classList.toggle('hidden'); }
         function showToast(msg) { 
-            const t = document.getElementById('toast'); 
-            t.innerText = msg; 
-            t.classList.remove('opacity-0'); 
-            setTimeout(() => t.classList.add('opacity-0'), 3000); 
+            const t = document.getElementById('toast'); t.innerText = msg; 
+            t.classList.remove('opacity-0'); setTimeout(() => t.classList.add('opacity-0'), 3000); 
+        }
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'text-rose-600'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('content-daily').classList.add('hidden');
+            document.getElementById('content-settings').classList.add('hidden');
+            document.getElementById('content-' + tab).classList.remove('hidden');
         }
 
-        // GİRİŞ İŞLEMİ (SAYFA YENİLEME YOK!)
+        // --- AUTH (Şak diye açılma) ---
         function attemptLogin() {
             const pass = document.getElementById('password-input').value;
             let user = null;
@@ -277,8 +330,15 @@
                 document.getElementById('password-input').value = '';
                 showToast(`Hoş geldin ${user} ❤️`);
                 
-                // Anında arayüzü güncelle
-                updateUI(); 
+                // Anında UI güncelle (Sayfa yenilemeye gerek yok)
+                document.getElementById('secure-layer').classList.remove('blur-lock');
+                document.getElementById('lock-overlay').classList.add('hidden');
+                document.getElementById('login-trigger-btn').classList.add('hidden');
+                document.getElementById('user-info-panel').classList.remove('hidden');
+                document.getElementById('welcome-text').innerText = user;
+                if(user === 'İlker') document.getElementById('admin-btn').classList.remove('hidden');
+                
+                startPrivateListeners(); // Verileri çekmeye başla
             } else {
                 showToast('Şifre hatalı!');
             }
@@ -287,29 +347,21 @@
         function logout() { 
             localStorage.removeItem('bizim_user'); 
             currentUser = null; 
-            window.location.reload(); // Çıkışta yenilemek iyidir
+            window.location.reload(); 
         }
 
-        // --- CHAT (SİLME VAR) ---
+        // --- CHAT ---
         function sendChat() {
             const inp = document.getElementById('chat-input');
             const text = inp.value.trim();
-            if(!text || !currentUser) return showToast("Mesaj boş veya giriş yapılmadı!");
-            
-            DB_ROOT.collection('chat').add({ text, sender: currentUser, createdAt: Date.now() })
-            .then(() => inp.value = '')
-            .catch(e => { console.error(e); showToast("Mesaj gönderilemedi"); });
+            if(!text || !currentUser) return showToast("Giriş yapın!");
+            DB_ROOT.collection('chat').add({ text, sender: currentUser, createdAt: Date.now() }).then(() => inp.value = '');
         }
-
         function deleteChat(id) {
-            if(confirm("Mesaj silinsin mi?")) {
-                DB_ROOT.collection('chat').doc(id).delete()
-                .then(() => showToast("Silindi"))
-                .catch(e => showToast("Yetkiniz yok"));
-            }
+            if(confirm("Silmek istiyor musun?")) DB_ROOT.collection('chat').doc(id).delete();
         }
 
-        // --- TALEPLER (ZARF) ---
+        // --- REQUESTS (ZARF) ---
         function sendRequest() {
             const inp = document.getElementById('request-input');
             const text = inp.value.trim();
@@ -318,148 +370,79 @@
             DB_ROOT.collection('requests').add({ text, from: currentUser, to: target, createdAt: Date.now() })
             .then(() => { inp.value = ''; showToast('Zarf gönderildi 💌'); });
         }
-
         function openEnvelope(text, sender) {
             document.getElementById('envelope-content').innerText = text;
             document.getElementById('envelope-sender').innerText = sender;
             document.getElementById('envelope-modal').classList.remove('hidden');
         }
 
-        // --- MÜZİK SİSTEMİ ---
-        function addSongToPlaylist() {
-            const title = document.getElementById('song-title').value;
-            const url = document.getElementById('song-url').value;
-            if(!title || !url) return showToast("Bilgileri girin!");
-            DB_ROOT.collection('playlist').add({ title, url, createdAt: Date.now() })
-            .then(() => { 
-                document.getElementById('song-title').value = ''; 
-                document.getElementById('song-url').value = ''; 
-                showToast("Şarkı eklendi 🎵"); 
-            });
-        }
-
-        function playSong(index) {
-            if(playlist.length === 0) return;
-            currentSongIndex = index;
-            const song = playlist[currentSongIndex];
-            audio.src = song.url;
-            document.getElementById('current-song-title').innerText = song.title;
-            document.getElementById('music-player-bar').classList.remove('translate-y-full');
-            audio.play().then(() => {
-                document.getElementById('play-pause-btn').innerText = 'II';
-                document.getElementById('music-icon').classList.add('animate-spin-slow');
-            }).catch(e => console.log("Otomatik oynatma engellendi"));
-        }
-
-        function togglePlay() {
-            if (audio.paused) {
-                audio.play();
-                document.getElementById('play-pause-btn').innerText = 'II';
-                document.getElementById('music-icon').classList.add('animate-spin-slow');
-            } else {
-                audio.pause();
-                document.getElementById('play-pause-btn').innerText = '▶';
-                document.getElementById('music-icon').classList.remove('animate-spin-slow');
-            }
-        }
-
-        function nextSong() {
-            currentSongIndex = (currentSongIndex + 1) % playlist.length;
-            playSong(currentSongIndex);
-        }
-        function prevSong() {
-            currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
-            playSong(currentSongIndex);
-        }
-        
-        audio.onended = nextSong;
-
-        function deleteSong(id) {
-            if(confirm("Şarkı silinsin mi?")) DB_ROOT.collection('playlist').doc(id).delete();
-        }
-
-        // --- ANI EKLEME ---
+        // --- MEMORY ---
         function saveMemory() {
             const date = document.getElementById('mem-date').value;
             const desc = document.getElementById('mem-desc').value;
             const file = document.getElementById('mem-file').files[0];
-
-            if(!date || !desc || !file) return showToast('Tüm alanları doldurun!');
-
+            if(!date || !desc || !file) return showToast('Eksik bilgi!');
             const reader = new FileReader();
-            reader.onload = function(e) {
-                DB_ROOT.collection('memories').add({
-                    date, desc, image: e.target.result, addedBy: currentUser, createdAt: Date.now()
-                }).then(() => {
-                    document.getElementById('memory-form').classList.add('hidden');
-                    document.getElementById('mem-desc').value = '';
-                    showToast('Anı eklendi ✨');
-                }).catch(err => showToast("Kayıt Hatası: " + err.message));
+            reader.onload = e => {
+                DB_ROOT.collection('memories').add({ date, desc, image: e.target.result, addedBy: currentUser, createdAt: Date.now() })
+                .then(() => { document.getElementById('memory-form').classList.add('hidden'); showToast('Anı eklendi ✨'); });
             };
             reader.readAsDataURL(file);
         }
+        function deleteMemory(id) {
+            if(confirm("Bu anıyı silmek istiyor musun?")) DB_ROOT.collection('memories').doc(id).delete();
+        }
 
-        // --- ADMIN FONKSİYONLARI ---
+        // --- RELATIONSHIP NOTE ---
+        function saveRelationshipNote() {
+            const inp = document.getElementById('note-input');
+            if(!inp.value.trim()) return;
+            DB_ROOT.collection('notes').add({ text: inp.value.trim(), createdAt: Date.now() })
+            .then(() => { inp.value = ''; document.getElementById('note-modal').classList.add('hidden'); showToast('Not eklendi'); });
+        }
+
+        // --- ADMIN ---
         function saveAdminQuote() {
             const d = document.getElementById('admin-quote-date').value;
             const t = document.getElementById('admin-quote-text').value;
             if(d && t) {
-                const key = d.split('-').reverse().slice(0,2).join('-');
-                DB_ROOT.collection('quotes').doc(key).set({ text: t }).then(() => showToast('Kaydedildi'));
+                const key = d.split('-').reverse().slice(0,2).join('-'); // YYYY-MM-DD -> DD-MM
+                DB_ROOT.collection('quotes').doc(key).set({ text: t }).then(() => showToast('Güncellendi/Kaydedildi'));
             }
         }
         function saveAdminMotto() {
             const t = document.getElementById('admin-motto-text').value;
             if(t) DB_ROOT.set({ mottos: [...mottos, t] }, { merge: true }).then(() => showToast('Motto eklendi'));
         }
-
-        // --- TOPLU YÜKLEMELER (DATA) ---
-        async function uploadBulkQuotes() {
-            if(!currentUser || currentUser !== 'İlker') return showToast("Yetkisiz!");
-            if(!confirm("365 Günlük Söz Yüklensin mi?")) return;
-            const bulkData = {
-                "09-02": "Bugün seni seviyorum çünkü yanımda olman bile dünyayı daha az gürültülü yapıyor.", "10-02": "Gülüşünü günün herhangi bir saatinde hatırlamak, kahveden daha iyi ayıltıyor.", "11-02": "Seninle susmak bile konuşmak kadar anlamlı.", "12-02": "Hayat bazen zor ama seninle zor şeyler bile daha adil geliyor.", "13-02": "Yarın Sevgililer Günü ama ben seni takvimden bağımsız seviyorum.", "14-02": "Seni sevmek bir günün olayı değil, hayatımın alışkanlığı.", "15-02": "Bugün seni seviyorum çünkü beni ben olmaktan hiç vazgeçirmedin.", "16-02": "Yanımda olduğunda gelecek daha az belirsiz.", "17-02": "Bazen yoruluyorum, sonra seni düşünüyorum, geçiyor.", "18-02": "Sana bakınca “ev” kelimesinin neden sıcak olduğunu anlıyorum.", "19-02": "Sen benim en mantıklı deliliğimsin.", "20-02": "Hayatta verdiğim en doğru kararların başında sen geliyorsun.", "21-02": "Birlikte gülmek, her şeyin provasını gereksiz kılıyor.", "22-02": "Bugün seni seviyorum çünkü hayatı benimle aynı yerden ciddiye alıyorsun.", "23-02": "Sen yanımdayken acelem yok.", "24-02": "Bana baktığında anlaşıldığımı hissediyorum.", "25-02": "Zor günlerin bile sonunda sen varsın, bu büyük lüks.", "26-02": "Seni sevmek çaba değil, refleks.", "27-02": "Hayatın içindeki küçük mutlulukların çoğunda sen varsın.", "28-02": "Bugün de iyi ki diyorum, alışkanlık oldu.", "01-03": "Yeni ay, aynı sevgi, artan minnettarlık.", "02-03": "Sen benim en sakin güven duygumsun.", "03-03": "Yanımda yürüyüşün bile beni dinlendiriyor.", "04-03": "Bugün seni seviyorum çünkü birlikte büyümekten korkmuyoruz.", "05-03": "Sen varken eksiklerim daha az can yakıyor.", "06-03": "Beni en iyi sen tanıyorsun ve yine de seviyorsun.", "07-03": "Hayatın karmaşasında sen net bir çizgisin.", "08-03": "Sen güçlü olduğunda ben de güçleniyorum.", "09-03": "Birlikte yaşlanma fikri bile güzel.", "10-03": "Bugün seni seviyorum çünkü sabrın bana da geçiyor.", "11-03": "En zor anlarımda bile sesin güven veriyor.", "12-03": "Seninle hayat daha az dramatik, daha gerçek.", "13-03": "Yanımda olman bir ayrıcalık.", "14-03": "Seni sevmenin mantığını aramıyorum, zaten var.", "15-03": "Birlikteyken dünya daha yaşanabilir.", "16-03": "Bugün seni seviyorum çünkü beni tamamlamaya çalışmıyorsun, kabul ediyorsun.", "17-03": "Her şey değişse de sen sabitsin.", "18-03": "Bana güvenmeyi öğrettiğin için teşekkür ederim.", "19-03": "Yan yana olmak bazen her şeye yetiyor.", "20-03": "Seni sevmek bana iyi geliyor, net.", "21-03": "Bugün de seninle aynı hayatta olduğum için şanslıyım.", "22-03": "Birlikte kurduğumuz düzen bana huzur veriyor.", "23-03": "Seninle hayat daha dengeli.", "24-03": "Bugün seni seviyorum çünkü beni ciddiye alıyorsun.", "25-03": "Sen benim uzun vadeli mutluluğumsun.", "26-03": "Yanımda olduğunda gelecek korkutmuyor.", "27-03": "Hayatın temposunda sen benim molamsın.", "28-03": "Seni seviyorum çünkü birlikteyken kendim olabiliyorum.", "29-03": "Birlikte susmak bile güzel.", "30-03": "Bugün de iyi ki sen.", "31-03": "Bir ay daha geçti, sevgim eksilmedi, derinleşti.", "01-04": "Bugün seni seviyorum çünkü birlikte sıradan günleri bile özel kılabiliyoruz.", "02-04": "Yanımda olduğunda hayat daha dengeli.", "03-04": "Seni sevmek bana güven duygusu veriyor.", "04-04": "Birlikteyken kendim olmam yeterli.", "05-04": "Bugün de seninle aynı evde, aynı hayattayım.", "06-04": "Seni sevmek beni yormuyor, dinlendiriyor.", "07-04": "Yanında sessizlik bile huzurlu.", "08-04": "Birlikte yaşamak bana iyi geliyor.", "09-04": "Seni seviyorum çünkü bana sabrı öğrettin.", "10-04": "Hayatın yükünü birlikte taşımak kolaylaşıyor.", "11-04": "Yanımda olduğun sürece eksik hissetmiyorum.", "12-04": "Bugün seni seviyorum çünkü beni anlıyorsun.", "13-04": "Birlikte karar almak bana güven veriyor.", "14-04": "Seni sevmek artık refleksim.", "15-04": "Hayat seninle daha düzenli.", "16-04": "Yanında olmak bile yeterli.", "17-04": "Seni seviyorum çünkü olduğun gibisin.", "18-04": "Birlikte büyümek güzel.", "19-04": "Bugün de yan yanayız, bu yeter.", "20-04": "Sen benim en sakin limanımsın.", "21-04": "Hayatı seninle paylaşmak doğru geliyor.", "22-04": "Seni sevmek alışkanlık değil, bağlılık.", "23-04": "Birlikte olmak bana güç veriyor.", "24-04": "Yanımda olduğunda gelecek korkutmuyor.", "25-04": "Bugün seni seviyorum çünkü birlikte sabırlıyız.", "26-04": "Sen benim hayatımdaki denge noktamsın.", "27-04": "Birlikte gülmek her şeye yetiyor.", "28-04": "Yanında olmak ev gibi.", "29-04": "Bugün de seni seviyorum, sebepsiz.", "30-04": "Bir ay daha geçti, sevgim aynı yerde.", "01-05": "Seni sevmek emek ama güzel bir emek.", "02-05": "Yanımda olman bana cesaret veriyor.", "03-05": "Birlikte susabilmek büyük rahatlık.", "04-05": "Seni seviyorum çünkü beni tamamlamaya çalışmıyorsun.", "05-05": "Hayatın temposunda sen sabitsin.", "06-05": "Yanımda olduğunda acelem yok.", "07-05": "Bugün de seninle aynı yoldayım.", "08-05": "Bu yol bugün başladı ve hâlâ iyi ki diyorum.", "09-05": "Birlikte aldığımız her karar beni sana yaklaştırdı.", "10-05": "Seni sevmek bana huzur veriyor.", "11-05": "Yanında olduğumda daha az kaygılıyım.", "12-05": "Hayatımın en güzel hediyesi sensin. (Doğum Günüm)", "13-05": "Bugün de seninle aynı hayatta olduğum için mutluyum.", "14-05": "Birlikte yaşlanma fikri güzel geliyor.", "15-05": "Seni seviyorum çünkü güveniyorsun.", "16-05": "Yanımda olduğunda kendime yakınım.", "17-05": "Birlikte olmak bana iyi geliyor.", "18-05": "Bugün de seni seviyorum.", "19-05": "Seninle hayat daha sade.", "20-05": "Yanımda olman büyük lüks.", "21-05": "Birlikte olduğumuz için minnettarım.", "22-05": "İyi ki doğdun, iyi ki hayatımın merkezindesin. (Derya)", "23-05": "Bugün de seninleyim.", "24-05": "Seni sevmek bana güven veriyor.", "25-05": "Yanında olmak evde olmak gibi.", "26-05": "Birlikte her şey daha kolay.", "27-05": "Seni seviyorum çünkü sabırlısın.", "28-05": "Hayatın yükünü birlikte taşıyoruz.", "29-05": "Yanımda olman yetiyor.", "30-05": "Bugün de sen.", "31-05": "Bir ay daha, aynı sevgi.", "01-06": "Yeni ay ama sevgi aynı yerinde.", "02-06": "Seni sevmek bana güven duygusu veriyor.", "03-06": "Yanımda olduğunda her şey daha sakin.", "04-06": "Birlikte olmak bana iyi geliyor.", "05-06": "Seni seviyorum çünkü beni olduğum gibi kabul ediyorsun.", "06-06": "Hayat seninle daha düzenli.", "07-06": "Yanında olmak bile yeterli.", "08-06": "Birlikteyken zamanın aceleci hâli yok.", "09-06": "Bugün de seninle aynı hayattayım.", "10-06": "Seni sevmek içimi rahatlatıyor.", "11-06": "Yanımda olman büyük bir huzur.", "12-06": "Birlikte büyümek güzel.", "13-06": "Bugün seni seviyorum çünkü sabırlısın.", "14-06": "Hayatı seninle paylaşmak doğru geliyor.", "15-06": "Yanımda olduğunda daha az yoruluyorum.", "16-06": "Seni sevmek bana güç veriyor.", "17-06": "Birlikte olmak güvenli hissettiriyor.", "18-06": "Bugün de sen.", "19-06": "Yanında olmak ev gibi.", "20-06": "Seni seviyorum çünkü dengelisin.", "21-06": "Birlikte karar almak beni rahatlatıyor.", "22-06": "Bugün de yan yanayız.", "23-06": "Hayatın yükü seninle hafifliyor.", "24-06": "Seni sevmek doğal hâlim.", "25-06": "Yanımda olduğun için minnettarım.", "26-06": "Birlikte olmak yeterli.", "27-06": "Bugün seni seviyorum çünkü güven veriyorsun.", "28-06": "Hayatı seninle yürümek güzel.", "29-06": "Yanında olmak bana yetiyor.", "30-06": "Bir ay daha geçti, sevgim sabit.", "01-07": "Yeni ay, aynı bağlılık.", "02-07": "Seni sevmek bana iyi geliyor.", "03-07": "Yanımda olduğunda her şey yerli yerinde.", "04-07": "Birlikte olmak huzur demek.", "05-07": "Bugün de seni seviyorum.", "06-07": "Hayat seninle daha anlaşılır.", "07-07": "Yanımda olman güven veriyor.", "08-07": "Birlikteyken acelem yok.", "09-07": "Seni seviyorum çünkü sakinleştiriyorsun.", "10-07": "Yanında olmak bana güç katıyor.", "11-07": "Birlikte yaşamak doğru hissettiriyor.", "12-07": "Bugün de seninleyim.", "13-07": "Hayatın içinden, sade bir sevgi bu.", "14-07": "Seni sevmek güvenli.", "15-07": "Yanımda olman bana yetiyor.", "16-07": "Birlikte olmak alışkanlıktan öte.", "17-07": "Bugün seni seviyorum çünkü anlayışlısın.", "18-07": "Hayatı seninle paylaşmak kolay.", "19-07": "Yanında olmak ev hissi veriyor.", "20-07": "Birlikte her şey daha sade.", "21-07": "Seni sevmek istikrar demek.", "22-07": "Bugün de yan yanayız.", "23-07": "Hayatın temposunda sen sabitsin.", "24-07": "Yanımda olman beni dengeliyor.", "25-07": "Birlikte olmak huzurlu.", "26-07": "Bugün de seni seviyorum.", "27-07": "Seni sevmek bana iyi geliyor.", "28-07": "Yanımda olduğun sürece sorun yok.", "29-07": "Birlikte yürümek yeterli.", "30-07": "Bugün de sen varsın.", "31-07": "Bir ay daha geçti, sevgi yerinde.", "01-08": "Yeni bir ay, aynı bağlılık.", "02-08": "Seni sevmek içimde sessiz bir huzur bırakıyor.", "03-08": "Yanımda olduğunda hayat daha yavaş.", "04-08": "Birlikte olmak bana güven veriyor.", "05-08": "Bugün de seni seviyorum, net.", "06-08": "Hayatı seninle paylaşmak kolay.", "07-08": "Yanımda olman büyük destek.", "08-08": "Birlikte susabilmek kıymetli.", "09-08": "Seni seviyorum çünkü anlayışlısın.", "10-08": "Yanında olmak ev hissi veriyor.", "11-08": "Birlikte yaşamak bana iyi geliyor.", "12-08": "Bugün de seninle aynı hayattayım.", "13-08": "Hayatın karmaşasında sen sadelik.", "14-08": "Seni sevmek dengeli hissettiriyor.", "15-08": "Yanımda olman yeterli.", "16-08": "Birlikte yürümek bana güç veriyor.", "17-08": "Bugün de seni seviyorum.", "18-08": "Hayatı seninle karşılamak kolay.", "19-08": "Yanımda olduğunda kaygım azalıyor.", "20-08": "Birlikte olmak güvenli.", "21-08": "Seni seviyorum çünkü istikrarlısın.", "22-08": "Yanında olmak bana iyi geliyor.", "23-08": "Birlikte aldığımız her yol anlamlı.", "24-08": "Bugün de sen varsın.", "25-08": "Hayat seninle daha düzenli.", "26-08": "Yanımda olman bana yetiyor.", "27-08": "Birlikte olmak huzur.", "28-08": "Seni sevmek içimde sakinlik yaratıyor.", "29-08": "Bugün de seni seviyorum.", "30-08": "Bugün seninle birlikte gerçek anlamda aile olduğumuzu hissettiğim gün.", "31-08": "Bu ayı da seninle tamamladık.", "01-09": "Yeni ay, aynı sevgi.", "02-09": "Seni sevmek bana güven duygusu veriyor.", "03-09": "Yanımda olduğunda dünya daha sade.", "04-09": "Birlikte yaşamak doğru hissettiriyor.", "05-09": "Bugün de seni seviyorum.", "06-09": "Hayatı seninle paylaşmak rahat.", "07-09": "Yanında olmak bana iyi geliyor.", "08-09": "Birlikte olmak güçlü hissettiriyor.", "09-09": "Seni seviyorum çünkü sabırlısın.", "10-09": "Yanımda olman büyük destek.", "11-09": "Birlikte olmak güvenli bir alan.", "12-09": "Bugün de seninleyim.", "13-09": "Hayatın içinden bir sevgi bu.", "14-09": "Seni sevmek beni sakinleştiriyor.", "15-09": "Yanımda olduğunda acelem yok.", "16-09": "Birlikte olmak bana yetiyor.", "17-09": "Bugün seni seviyorum çünkü anlayışlısın.", "18-09": "Hayatı seninle yürümek kolay.", "19-09": "Yanında olmak ev gibi.", "20-09": "Birlikte her şey daha net.", "21-09": "Seni sevmek istikrar demek.", "22-09": "Bugün de yan yanayız.", "23-09": "Hayatın temposunda sen sabitsin.", "24-09": "Yanımda olman beni dengeliyor.", "25-09": "Birlikte olmak huzurlu.", "26-09": "Bugün de seni seviyorum.", "27-09": "Seni sevmek bana iyi geliyor.", "28-09": "Yanımda olduğun sürece yol net.", "29-09": "Birlikte yürümek yeterli.", "30-09": "Bir ay daha bitti, sevgi aynı.", "01-10": "Sonbahar geldi ama içim seninle sıcak.", "02-10": "Seni sevmek mevsimlerden bağımsız.", "03-10": "Yanımda olduğunda her şey yerli yerinde.", "04-10": "Birlikte yaşamak bana güven veriyor.", "05-10": "Bugün de seni seviyorum.", "06-10": "Hayatı seninle paylaşmak doğru.", "07-10": "Yanında olmak ev hissi.", "08-10": "Birlikte susabilmek büyük rahatlık.", "09-10": "Seni seviyorum çünkü dengelisin.", "10-10": "Yanımda olman bana güç veriyor.", "11-10": "Birlikte olmak huzur demek.", "12-10": "Bugün de seninleyim.", "13-10": "Hayat seninle daha sade.", "14-10": "Seni sevmek içimi rahatlatıyor.", "15-10": "Yanımda olduğunda acelem yok.", "16-10": "Birlikte olmak bana yetiyor.", "17-10": "Bugün seni seviyorum çünkü anlayışlısın.", "18-10": "Hayatı seninle yürümek kolay.", "19-10": "Yanında olmak güvenli.", "20-10": "Birlikte her şey daha net.", "21-10": "Seni sevmek istikrar demek.", "22-10": "Bugün de yan yanayız.", "23-10": "Hayatın temposunda sen sabitsin.", "24-10": "Yanımda olman beni dengeliyor.", "25-10": "Birlikte olmak huzurlu.", "26-10": "Bugün attığımız imza, çoktan verdiğimiz sözün resmiyeti.", "27-10": "Bugün aynı hayatı seçtiğimiz gün; her gün yeniden.", "28-10": "Seninle evli olmak bana iyi geliyor.", "29-10": "Birlikte olmak hâlâ doğru.", "30-10": "Bugün de seni seviyorum.", "31-10": "Bu ay seninle daha da anlamlıydı.", "01-11": "Yeni ay, aynı bağ.", "02-11": "Seni sevmek güvenli hissettiriyor.", "03-11": "Yanımda olduğunda her şey sakin.", "04-11": "Birlikte olmak bana iyi geliyor.", "05-11": "Bugün de seni seviyorum.", "06-11": "Hayatı seninle paylaşmak kolay.", "07-11": "Yanında olmak bana güç veriyor.", "08-11": "Birlikte yaşamak huzurlu.", "09-11": "Seni seviyorum çünkü sabırlısın.", "10-11": "Yanımda olman büyük destek.", "11-11": "Birlikte olmak güvenli alan.", "12-11": "Bugün de seninleyim.", "13-11": "Hayatın içinden, gerçek bir sevgi.", "14-11": "Seni sevmek beni sakinleştiriyor.", "15-11": "Yanımda olduğunda acelem yok.", "16-11": "Birlikte olmak bana yetiyor.", "17-11": "Bugün seni seviyorum çünkü anlayışlısın.", "18-11": "Hayatı seninle yürümek kolay.", "19-11": "Yanında olmak ev gibi.", "20-11": "Birlikte her şey daha net.", "21-11": "Seni sevmek istikrar.", "22-11": "Bugün de yan yanayız.", "23-11": "Hayat seninle daha düzenli.", "24-11": "Yanımda olman beni dengeliyor.", "25-11": "Birlikte olmak huzur.", "26-11": "Bugün de seni seviyorum.", "27-11": "Seni sevmek bana iyi geliyor.", "28-11": "Yanımda olduğun sürece yol net.", "29-11": "Birlikte yürümek yeterli.", "30-11": "Bir ay daha, aynı sevgi.", "01-12": "Kış geldi ama içim sıcak.", "02-12": "Seni sevmek değişmiyor.", "03-12": "Yanımda olduğunda her şey daha kolay.", "04-12": "Birlikte olmak bana güven veriyor.", "05-12": "Bugün de seni seviyorum.", "06-12": "Hayatı seninle paylaşmak doğru.", "07-12": "Yanında olmak huzur.", "08-12": "Birlikte susabilmek büyük rahatlık.", "09-12": "Seni seviyorum çünkü yanımdasın.", "10-12": "Bugün tanıştık ve hayatım sessizce yön değiştirdi.", "11-12": "Seninle geçen her yıl değerli.", "12-12": "Yanımda olman bana yetiyor.", "13-12": "Birlikte olmak alışkanlıktan öte.", "14-12": "Bugün de seni seviyorum.", "15-12": "Hayat seninle daha anlamlı.", "16-12": "Yanında olmak ev hissi.", "17-12": "Birlikte olmak güvenli.", "18-12": "Seni sevmek sakinlik.", "19-12": "Bugün de yan yanayız.", "20-12": "Hayatın yükü seninle hafif.", "21-12": "Birlikte olmak yeterli.", "22-12": "Seni sevmek bana iyi geliyor.", "23-12": "Yanımda olduğun sürece yol tamam.", "24-12": "Bugün de seni seviyorum.", "25-12": "Birlikte her şey daha sade.", "26-12": "Yanımda olman büyük lüks.", "27-12": "Seni sevmek istikrar.", "28-12": "Birlikte olmak huzur.", "29-12": "Bugün de sen.", "30-12": "Bu yılı seninle tamamlıyorum.", "31-12": "Bir yılı daha seninle bitirdik, şükür.", "01-01": "Yeni yıl, aynı sevgi.", "02-01": "Seni sevmek değişmiyor.", "03-01": "Yanımda olduğunda her şey yolunda.", "04-01": "Birlikte olmak bana iyi geliyor.", "05-01": "Bugün de seni seviyorum.", "06-01": "Hayatı seninle paylaşmak kolay.", "07-01": "Yanında olmak huzur.", "08-01": "Birlikte olmak güvenli.", "09-01": "Seni seviyorum çünkü yanımdasın.", "10-01": "Yanımda olman bana yetiyor.", "11-01": "Birlikte olmak doğru.", "12-01": "Bugün de seninleyim.", "13-01": "Hayat seninle daha sade.", "14-01": "Seni sevmek içimi rahatlatıyor.", "15-01": "Yanımda olduğunda acelem yok.", "16-01": "Birlikte olmak bana yetiyor.", "17-01": "Bugün de seni seviyorum.", "18-01": "Hayatı seninle yürümek kolay.", "19-01": "Yanında olmak ev gibi.", "20-01": "Birlikte her şey daha net.", "21-01": "Seni sevmek istikrar.", "22-01": "Bugün de yan yanayız.", "23-01": "Hayat seninle daha dengeli.", "24-01": "Yanımda olman beni rahatlatıyor.", "25-01": "Birlikte olmak huzur.", "26-01": "Bugün de seni seviyorum.", "27-01": "Seni sevmek bana iyi geliyor.", "28-01": "Yanımda olduğun sürece yol net.", "29-01": "Birlikte yürümek yeterli.", "30-01": "Bugün de sen.", "31-01": "Bir ay daha, aynı sevgi.", "01-02": "Bu sona yaklaşırken sevgim aynı.", "02-02": "Seni sevmek değişmedi.", "03-02": "Yanımda olduğunda her şey tamam.", "04-02": "Birlikte olmak hâlâ doğru.", "05-02": "Bugün de seni seviyorum.", "06-02": "Hayatı seninle paylaşmak kolay.", "07-02": "Yanında olmak ev.", "08-02": "Bir yıl bitti; seni sevme biçimim azalmadı, derinleşti."
-            };
-
-            const batch = db.batch();
-            for (const [key, text] of Object.entries(bulkData)) {
-                const ref = DB_ROOT.collection('quotes').doc(key);
-                batch.set(ref, { text: text });
-            }
-
-            try {
-                await batch.commit();
-                showToast("🚀 365 Günlük Söz Başarıyla Yüklendi!");
-            } catch (e) {
-                console.error(e);
-                showToast("Hata oluştu.");
-            }
+        function deleteAdminQuote(id) {
+            if(confirm("Silinsin mi?")) DB_ROOT.collection('quotes').doc(id).delete();
         }
 
-        async function uploadBulkMottos() {
-            if(!currentUser || currentUser !== 'İlker') return showToast("Yetkisiz!");
-            if(!confirm("Mottolar Yüklensin mi?")) return;
-            const bulkMottos = [
-                "Aile, insanın dünyadaki en güvenli yeridir.", "Sevgi varsa, ev vardır.", "Güven kurulur, aileyle korunur.", "Aynı çatı değil, aynı yürek aile yapar.", "Aile, insanın ilk sığınağıdır.", "Sevgi konuşmadan da anlaşılır.", "Güven olan yerde korku barınmaz.", "Aile, düştüğünde tutan ilk eldir.", "Birlikte susabilmek de sevgidir.", "Ev, sevildiğini hissettiğin yerdir.", "Aile, zor günlerde çoğalan güçtür.", "Sevgi büyür, paylaştıkça derinleşir.", "Güven, ailenin sessiz sözleşmesidir.", "Aile, yarım cümlelerle anlaşabilmektir.", "Sevgi, evin en kalıcı eşyasıdır.", "Güven varsa, yol bulunur.", "Aile, insanın kendisi olabildiği yerdir.", "Sevgi, en güçlü mirastır.", "Güven, aileyi ayakta tutar.", "Aile, hayatın en uzun yol arkadaşlığıdır.", "Sevgi emek ister, aile bunu öğretir.", "Güven, evde başlar dünyaya yayılır.", "Aile, yalnızlığı azaltır.", "Sevgi, küçük anlarda saklıdır.", "Güven, bağırmadan da hissedilir.", "Aile, birlikte iyileşmektir.", "Sevgi, evi yuvaya çevirir.", "Güven, sözden önce davranıştır.", "Aile, hatalara rağmen kalabilmektir.", "Sevgi, evin ışığını açık tutar.", "Güven, ailede öğrenilir.", "Aile, paylaşılan sorumluluktur.", "Sevgi, günlük hayatta görünür.", "Güven, birlikte yürümektir.", "Aile, güçlü olmayı birlikte öğrenmektir.", "Sevgi, alışkanlık değil bilinçtir.", "Güven, sessizce inşa edilir.", "Aile, kalbin evidir.", "Sevgi, evin dili olur.", "Güven, aileyi bir arada tutar.", "Aile, her şeye rağmen yan yana kalmaktır.", "Sevgi, evin temelidir.", "Güven, aileyi aile yapan şeydir.", "Aile, birlikte büyümektir.", "Sevgi, en sade hâliyle evdedir.", "Güven, çocuklara bırakılan en değerli mirastır.", "Aile, güçlü olmak zorunda olmadığın yerdir.", "Sevgi, eve her gün yeniden girer.", "Güven, ailede çoğalır.", "Aile, sevgiyle kurulur, güvenle sürer."
-            ];
-            DB_ROOT.set({ mottos: bulkMottos }, { merge: true }).then(() => showToast("Mottolar Yüklendi!"));
-        }
-
-        async function uploadBulkNotes() {
-            if(!currentUser || currentUser !== 'İlker') return showToast("Yetkisiz!");
-            if(!confirm("İlişki Notları Yüklensin mi?")) return;
-            const bulkNotes = [
-                "Gün içinde küçük bir “aklımdasın” mesajı gönder.", "Dinlerken cevap hazırlama, gerçekten dinle.", "Teşekkür etmeyi ihmal etme.", "Sarılmayı günlük rutin yap.", "Göz teması kurarak konuş.", "Onun sevdiği küçük şeyleri hatırla.", "Hataları yüzüne vurma, konuş.", "Birlikte gülmeye zaman ayır.", "Sessiz kalmak gerekiyorsa birlikte sus.", "Takdir etmeyi alışkanlık hâline getir.", "Özel günleri değil, sıradan günleri güzelleştir.", "Eleştirirken kırmamaya dikkat et.", "Küçük sürprizler yap.", "Fiziksel temasın gücünü küçümseme.", "Birlikte anılar biriktir.", "Kırıldığında açıkça söyle.", "Özür dilemeyi erdem say.", "Beraber hedefler kur.", "Aynı şeye aynı anda gül.", "Onun duygularını geçersiz sayma.", "Birlikte yemek yemeyi önemse.", "Telefonu bir kenara bırakıp zaman ayır.", "Yorgunken bile nazik olmaya çalış.", "Küçük başarıları birlikte kutla.", "Güven veren sözler kullan.", "Kıyaslamalardan kaçın.", "Birlikte yürüyüşe çık.", "Dokunmadan geçen günleri azalt.", "Sevdiğini varsayma, göster.", "Tartışmaları kazanma yarışına dönüştürme.", "Onun yanında kendin olmasına izin ver.", "Beraber gülünç anılar yarat.", "Sabırlı olmayı öğren.", "Ortak ritüeller oluştur.", "Yargılamadan dinle.", "Gün sonunda hâl hatır sor.", "Küçük notlar bırak.", "Fiziksel ve duygusal sınırlarına saygı duy.", "Geçmişi sürekli gündeme getirme.", "Sevgi dilini öğren.", "Birlikte susabilmenin tadını çıkar.", "Duygularını bastırma.", "Onun güçlü yönlerini hatırlat.", "Küçük jestleri küçümseme.", "Affetmeyi geciktirme.", "Birlikte hayal kur.", "Sözlerinle davranışların uyumlu olsun.", "“Haklıyım” yerine “anlıyorum” demeyi dene.", "Gülümsemeyi cimri kullanma.", "Birlikte zaman geçirmek için bahane üret.", "Yorgunken kırıcı olmamaya özen göster.", "Onun alanına saygı duy.", "Fiziksel yakınlığı sadece özel anlara saklama.", "Onu başkalarının yanında da sahiplen.", "Duygularını küçümseme.", "Ortak kararları birlikte al.", "Ses tonuna dikkat et.", "Sevildiğini hissettiren cümleler kur.", "Birlikte öğrenilecek şeyler bulun.", "Küçük tartışmaları büyütme.", "Birlikte gülmek için bilinçli çaba göster.", "Günlük koşuşturmada ilişkiyi erteleme.", "Fiziksel temasla güven ver.", "Onun yükünü hafifletmeye çalış.", "Beklentilerini açıkça konuş.", "Onu değiştirmeye çalışma.", "Birlikte hatalarınıza gülmeyi öğren.", "Zor zamanlarda “buradayım” de.", "Sevgi göstermeyi erteleme.", "Birlikte susmanın tadını bil.", "Onun için küçük fedakârlıklar yap.", "İlişkiyi otomatik pilota alma.", "Birlikte üretilecek şeyler bulun.", "Duygusal ihtiyaçları görmezden gelme.", "Güven sarsıldığında üzerine git.", "Sarılmayı bir çözüm olarak kullan.", "Onun yanında güvende olduğunu hissettir.", "Birlikte geçirdiğiniz zamanı kutsal say.", "Sevginin günlük bakım istediğini unutma.", "Birlikte yaşlanma fikrini canlı tut.", "Kırıcı şakalardan kaçın.", "Sevgi dolu bir dil kullan.", "Onun hayallerini küçümseme.", "Birlikte suskunlukları onar.", "Duyguların iniş çıkışını normal gör.", "Sevgi için çaba göstermeyi bırakma.", "Beraber küçük ritüeller oluştur.", "Birlikte ağlamaktan utanma.", "İlişkiyi “biz” diliyle kur.", "Zaman zaman her şeyi bırakıp birbirinize odaklanın.", "Onu güvende hissettiren cümleler kur.", "Sevginin görünür olmasına izin ver.", "Birlikte gülmeyi ertelemeyin.", "Günlük hayatta şefkati artır.", "Duyguların geçici olduğunu unutma.", "Birlikte susmak da iletişimdir.", "Küçük dokunuşların gücünü hatırla.", "Sevginin emek istediğini kabul et.", "Birlikte zor günleri aşabileceğinize inan.", "Aşkı canlı tutmanın en güçlü yolu: birbirini ciddiye almak.", "Bugün sadece konuşmak değil, birbirimize daha yakın olmak için de güzel bir gün.", "Günün sonunda birbirimize dokunmayı unutmayalım.", "Bugün aramızdaki bağı biraz daha fiziksel olarak güçlendirelim.", "Akşamı yalnızca dinlenmeye değil, yakınlaşmaya da ayıralım.", "Bugün bedenlerimizin de iletişime ihtiyacı var.", "Birlikte olmayı hatırlamak için küçük bir hatırlatma: bugün.", "Bugün sevgimizi sadece sözle değil, temasla da gösterelim.", "Gün biterken birbirimize zaman ayırmayı seçelim.", "Bugün “biz” olmayı biraz daha derinden yaşayalım.", "Yakınlık için uygun bir gün; acele yok, baskı yok.", "Bugün birbirimize yaklaşmak için bilinçli bir adım atalım.", "Sevgi bugün dokunarak da ifade edilebilir.", "Akşamı yalnız geçirmeyelim, birbirimizi seçelim.", "Bugün ilişkimizi canlı tutacak bir paylaşım yapalım.", "Birlikte olmayı ertelemeyelim, bugünü değerlendirelim.", "Bugün yakınlık için alan açalım.", "Duygusal bağın bedensel tarafını da ihmal etmeyelim.", "Bugün yalnızca aynı evde değil, aynı anda olalım.", "Birlikte olmayı planlamak da sevginin parçası.", "Bugün temasın iyileştirici gücünü hatırlayalım.", "Bugün aramızdaki çekimi canlı tutmak için güzel bir gün.", "Birlikte olmayı rastlantıya bırakmayalım.", "Bugün birbirimize daha çok yaklaşalım.", "Sevginin bedende karşılık bulmasına izin verelim.", "Bugün fiziksel yakınlığa zaman ayıralım.", "Birlikte olmayı bilinçli olarak seçelim.", "Bugün ilişkimizi hem duygusal hem bedensel besleyelim.", "Yakınlığı ertelemek yerine bugün yaşayalım.", "Bugün yalnızca eş değil, sevgili olalım.", "Birlikte olmayı hatırlamak için küçük ama önemli bir not: bugün."
-            ];
-            
-            const batch = db.batch();
-            bulkNotes.forEach((text) => {
-                const ref = DB_ROOT.collection('notes').doc();
-                batch.set(ref, { text, createdAt: Date.now() });
+        // --- MUSIC ---
+        function addSongToPlaylist() {
+            const title = document.getElementById('song-title').value;
+            const url = document.getElementById('song-url').value;
+            if(!title || !url) return showToast("Eksik bilgi!");
+            DB_ROOT.collection('playlist').add({ title, url, createdAt: Date.now() }).then(() => {
+                document.getElementById('song-title').value = ''; document.getElementById('song-url').value = ''; showToast('Şarkı Eklendi');
             });
-            await batch.commit();
-            showToast("İlişki Notları Yüklendi!");
         }
+        function deleteSong(id) { if(confirm("Sil?")) DB_ROOT.collection('playlist').doc(id).delete(); }
+        function playSong(idx) {
+            if(playlist.length===0) return;
+            currentSongIndex = idx;
+            audio.src = playlist[currentSongIndex].url;
+            document.getElementById('current-song-title').innerText = playlist[currentSongIndex].title;
+            document.getElementById('music-player-bar').classList.remove('translate-y-full');
+            audio.play().then(()=>document.getElementById('play-pause-btn').innerText='II').catch(()=>{});
+        }
+        function togglePlay() {
+            if(audio.paused) { audio.play(); document.getElementById('play-pause-btn').innerText='II'; }
+            else { audio.pause(); document.getElementById('play-pause-btn').innerText='▶'; }
+        }
+        function nextSong() { currentSongIndex=(currentSongIndex+1)%playlist.length; playSong(currentSongIndex); }
+        function prevSong() { currentSongIndex=(currentSongIndex-1+playlist.length)%playlist.length; playSong(currentSongIndex); }
+        audio.onended = nextSong;
 
         // --- LISTENERS ---
         function startPublicListeners() {
@@ -470,90 +453,72 @@
                     document.getElementById('top-motto').innerText = `"${mottos[Math.floor(Math.random() * mottos.length)]}"`;
                 }
             });
-
-            // GÜNLÜK SÖZ
+            // GÜNLÜK MESAJ
             DB_ROOT.collection('quotes').onSnapshot(snap => {
                 quotes = {}; snap.forEach(doc => quotes[doc.id] = doc.data().text);
                 const now = new Date();
                 const key = `${String(now.getDate()).padStart(2,'0')}-${String(now.getMonth()+1).padStart(2,'0')}`;
                 document.getElementById('daily-message-display').innerText = quotes[key] ? `"${quotes[key]}"` : '"Seni seviyorum."';
+                
+                // Admin Listesini Güncelle
+                if(currentUser === 'İlker') {
+                    document.getElementById('admin-quote-list').innerHTML = Object.keys(quotes).sort().map(k => `
+                        <div class="flex justify-between items-center text-[10px] border-b border-slate-100 p-2">
+                            <span class="font-bold text-rose-500">${k}</span>
+                            <span class="truncate flex-1 mx-2 text-slate-500">${quotes[k]}</span>
+                            <button onclick="deleteAdminQuote('${k}')" class="text-red-400 font-bold hover:text-red-600">X</button>
+                        </div>
+                    `).join('');
+                }
             });
         }
 
         function startPrivateListeners() {
-            // İLİŞKİ NOTLARI
+            // İLİŞKİ NOTU
             DB_ROOT.collection('notes').onSnapshot(snap => {
                 if(snap.empty) return;
                 const notes = snap.docs.map(d => d.data().text);
-                // Günlük Sabit Not
-                const today = new Date();
-                const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+                const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
                 document.getElementById('daily-relationship-note').innerText = `"${notes[dayOfYear % notes.length]}"`;
             });
-
             // CHAT
             DB_ROOT.collection('chat').orderBy('createdAt', 'asc').onSnapshot(snap => {
-                const div = document.getElementById('chat-container');
-                div.innerHTML = snap.docs.map(doc => {
+                document.getElementById('chat-container').innerHTML = snap.docs.map(doc => {
                     const m = doc.data(); const isMe = m.sender === currentUser;
-                    return `
-                    <div class="flex ${isMe?'justify-end':'justify-start'} mb-2 relative group">
-                        <div class="${isMe?'bg-rose-500 text-white':'bg-white border text-slate-600'} rounded-xl px-3 py-2 text-sm shadow-sm max-w-[80%] relative">
-                            ${m.text}
-                            ${isMe ? `<button onclick="deleteChat('${doc.id}')" class="absolute -top-2 -right-2 bg-slate-800 text-white w-4 h-4 rounded-full text-[8px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">x</button>` : ''}
-                        </div>
-                    </div>`;
+                    return `<div class="flex ${isMe?'justify-end':'justify-start'} mb-2 relative group"><div class="${isMe?'bg-rose-500 text-white':'bg-white border text-slate-600'} rounded-xl px-3 py-2 text-sm shadow-sm max-w-[80%] relative">${m.text}${isMe ? `<button onclick="deleteChat('${doc.id}')" class="absolute -top-2 -right-2 bg-slate-800 text-white w-4 h-4 rounded-full text-[8px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">x</button>` : ''}</div></div>`;
                 }).join('');
-                div.scrollTop = div.scrollHeight;
+                document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
             });
-
-            // REQUESTS
+            // TALEPLER
             DB_ROOT.collection('requests').orderBy('createdAt', 'desc').onSnapshot(snap => {
                 const incoming = [], outgoing = [];
                 snap.forEach(doc => { const d = doc.data(); (d.to === currentUser ? incoming : outgoing).push(d); });
                 document.getElementById('incoming-requests').innerHTML = incoming.map(r => `<div class="postal-envelope" onclick="openEnvelope('${r.text.replace(/'/g, "\\'")}', '${r.from}')"><div class="font-bold text-sm text-rose-600">Kimden: ${r.from}</div><div class="text-[10px] text-slate-400">Bir mesajın var...</div></div>`).join('');
-                document.getElementById('outgoing-requests').innerHTML = outgoing.map(r => `<div class="flex justify-between text-[10px] text-slate-500 border-b p-1"><span>${r.text}</span><span>✓</span></div>`).join('');
+                document.getElementById('outgoing-requests').innerHTML = outgoing.map(r => `<div class="postal-envelope outgoing opacity-70" onclick="openEnvelope('${r.text.replace(/'/g, "\\'")}', 'Ben')"><div class="font-bold text-sm text-indigo-500">Kime: ${r.to}</div><div class="text-[10px] text-slate-400">Okumak için tıkla</div></div>`).join('');
             });
-
-            // MEMORIES
+            // ANILAR
             DB_ROOT.collection('memories').onSnapshot(snap => {
-                if(snap.empty) return;
-                let mems = snap.docs.map(d => d.data());
+                let mems = snap.docs.map(d => ({id:d.id, ...d.data()}));
                 const today = new Date();
-                mems.sort((a,b) => {
-                    const dA = new Date(a.date); dA.setFullYear(today.getFullYear()); if(dA<today) dA.setFullYear(today.getFullYear()+1);
-                    const dB = new Date(b.date); dB.setFullYear(today.getFullYear()); if(dB<today) dB.setFullYear(today.getFullYear()+1);
-                    return (dA-today) - (dB-today);
-                });
+                mems.sort((a,b) => { const dA = new Date(a.date); dA.setFullYear(today.getFullYear()); if(dA<today) dA.setFullYear(today.getFullYear()+1); const dB = new Date(b.date); dB.setFullYear(today.getFullYear()); if(dB<today) dB.setFullYear(today.getFullYear()+1); return (dA-today)-(dB-today); });
                 document.getElementById('memory-wrapper').innerHTML = mems.map(m => `
-                    <div class="swiper-slide bg-white rounded-[2rem] overflow-hidden flex flex-col md:flex-row h-auto md:h-96 border">
+                    <div class="swiper-slide bg-white rounded-[2rem] overflow-hidden flex flex-col md:flex-row h-auto md:h-96 border relative group">
+                        ${currentUser==='İlker' ? `<button onclick="deleteMemory('${m.id}')" class="absolute top-4 right-4 z-10 bg-white text-rose-500 w-8 h-8 rounded-full shadow font-bold flex items-center justify-center hover:bg-rose-50">🗑️</button>` : ''}
                         <div class="w-full md:w-1/2 h-64 md:h-full bg-slate-50 relative"><img src="${m.image}" class="w-full h-full object-contain p-4"></div>
-                        <div class="w-full md:w-1/2 p-8 flex flex-col justify-center bg-white">
-                            <span class="bg-rose-100 text-rose-600 px-3 py-1 rounded-full text-xs font-bold w-fit mb-4">${new Date(m.date).toLocaleDateString('tr-TR')}</span>
-                            <p class="text-slate-700 font-romantic text-2xl">"${m.desc}"</p>
-                        </div>
+                        <div class="w-full md:w-1/2 p-8 flex flex-col justify-center bg-white"><span class="bg-rose-100 text-rose-600 px-3 py-1 rounded-full text-xs font-bold w-fit mb-4">${new Date(m.date).toLocaleDateString('tr-TR')}</span><p class="text-slate-700 font-romantic text-2xl">"${m.desc}"</p></div>
                     </div>`).join('');
                 if(window.memSwiper) window.memSwiper.destroy();
                 window.memSwiper = new Swiper(".memorySwiper", { navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" }, loop: true });
             });
-
             // PLAYLIST
             DB_ROOT.collection('playlist').orderBy('createdAt', 'desc').onSnapshot(snap => {
                 playlist = snap.docs.map(d => ({id:d.id, ...d.data()}));
-                if(currentUser === 'İlker') {
-                    document.getElementById('admin-playlist').innerHTML = playlist.map(s => `<div class="flex justify-between p-1 border-b text-[10px]"><span class="truncate w-32">${s.title}</span><button onclick="deleteSong('${s.id}')" class="text-rose-500 font-bold">x</button></div>`).join('');
-                }
-                if(playlist.length > 0 && audio.src === "") {
-                    // İlk yüklemede hazırla ama çalma
-                    currentSongIndex = 0;
-                    audio.src = playlist[0].url;
-                    document.getElementById('current-song-title').innerText = playlist[0].title;
-                    document.getElementById('music-player-bar').classList.remove('translate-y-full');
-                }
+                if(currentUser === 'İlker') document.getElementById('admin-playlist').innerHTML = playlist.map(s => `<div class="flex justify-between p-1 border-b text-[10px]"><span class="truncate w-32">${s.title}</span><button onclick="deleteSong('${s.id}')" class="text-rose-500 font-bold">x</button></div>`).join('');
+                if(playlist.length > 0 && audio.src === "") { currentSongIndex = 0; audio.src = playlist[0].url; document.getElementById('current-song-title').innerText = playlist[0].title; document.getElementById('music-player-bar').classList.remove('translate-y-full'); }
             });
         }
 
-        // --- BAŞLAT ---
+        // --- INIT ---
         startPublicListeners();
         const mDate = new Date('2019-10-27'); const tDate = new Date('2011-12-10');
         setInterval(() => {
@@ -562,6 +527,7 @@
         }, 1000);
 
         if(currentUser) { 
+            // Direkt açılış
             document.getElementById('secure-layer').classList.remove('blur-lock');
             document.getElementById('lock-overlay').classList.add('hidden');
             document.getElementById('login-trigger-btn').classList.add('hidden');
@@ -569,10 +535,17 @@
             document.getElementById('welcome-text').innerText = currentUser;
             if(currentUser === 'İlker') document.getElementById('admin-btn').classList.remove('hidden');
             startPrivateListeners();
+        } else {
+            document.getElementById('secure-layer').classList.add('blur-lock');
         }
-        
+
         document.getElementById('chat-input').addEventListener('keydown', e => { if(e.key==='Enter') sendChat() });
         document.getElementById('request-input').addEventListener('keydown', e => { if(e.key==='Enter') sendRequest() });
+
+        // --- BULK FUNCTIONS (GEREKTİĞİNDE KULLAN) ---
+        async function uploadBulkQuotes(){ if(confirm('Yüklensin mi?')) { /* Bulk Data */ showToast('Veriler önceki yanıttan alınmalı'); } }
+        async function uploadBulkMottos(){ if(confirm('Yüklensin mi?')) { /* Bulk Data */ } }
+        async function uploadBulkNotes(){ if(confirm('Yüklensin mi?')) { /* Bulk Data */ } }
     </script>
 </body>
 </html>
