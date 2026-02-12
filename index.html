@@ -202,9 +202,9 @@
         <div class="flex gap-4 pr-4 items-center">
             <button onclick="togglePlay()" id="play-pause-btn" class="bg-rose-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">▶</button>
         </div>
-        <!-- Güncellenen dosya adı: müzik.mp3 -->
+        <!-- Güncellenen dosya adı: muzik.mp3 -->
         <audio id="audio-element" loop>
-            <source src="müzik.mp3" type="audio/mpeg">
+            <source src="muzik.mp3" type="audio/mpeg">
         </audio>
     </div>
 
@@ -247,7 +247,7 @@
             <div id="content-settings" class="space-y-8 hidden">
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center">
                     <p class="text-[10px] font-bold text-slate-500">Müzik Ayarı</p>
-                    <p class="text-[10px] text-slate-400">Müzik: 'müzik.mp3' (Türkçe karakterli)</p>
+                    <p class="text-[10px] text-slate-400">Müzik: 'muzik.mp3' (Türkçe karakterli)</p>
                 </div>
                 <div class="border-t border-slate-100 pt-4 space-y-3">
                     <p class="text-[9px] text-slate-400 text-center uppercase tracking-widest">Toplu İşlemler (Tek Seferlik)</p>
@@ -313,6 +313,7 @@
         let quotes = {};
         let notesPool = [];
         const audio = document.getElementById('audio-element');
+        audio.volume = 0.2; // SES SEVİYESİ %20
 
         // --- AUTH: ANINDA AÇILIŞ (SPA MANTIĞI) ---
         function attemptLogin() {
@@ -400,7 +401,8 @@
         // --- MAIN LOGIC ---
         function showRandomNote() {
             if(notesPool.length > 0) {
-                document.getElementById('daily-relationship-note').innerText = `"${notesPool[Math.floor(Math.random() * notesPool.length)]}"`;
+                const randomIndex = Math.floor(Math.random() * notesPool.length);
+                document.getElementById('daily-relationship-note').innerText = `"${notesPool[randomIndex]}"`;
             }
         }
 
@@ -489,11 +491,13 @@
         // --- MUSIC ---
         // Sadece global bir fonksiyon olarak tanımlı, dosya adı sabit.
         function initAudioContext() {
+            // Müzik zaten çalıyorsa dokunma
             if (audio.paused) {
                 audio.play().then(() => {
                     document.getElementById('play-pause-btn').innerText = 'II';
                 }).catch(() => {
-                    // Otomatik oynatma engellendiyse hata mesajı vermiyoruz, kullanıcı tıklayınca çalacak
+                    // Otomatik oynatma engellendiyse
+                    console.log("Otomatik oynatma engellendi, tıklama bekleniyor.");
                 });
             }
         }
@@ -510,6 +514,11 @@
             document.getElementById('current-song-title').classList.add('text-red-500');
             showToast("Müzik dosyası (müzik.mp3) bulunamadı. Dosya adını kontrol et.");
         });
+        
+        // SAYFA YÜKLENDİĞİNDE OTOMATİK BAŞLATMAYI DENE
+        window.onload = function() {
+            initAudioContext();
+        };
 
         // --- LISTENERS ---
         // 1. PUBLIC DATA
@@ -538,8 +547,10 @@
                 if(snap.empty) return;
                 const notesData = snap.docs.map(d => ({id: d.id, text: d.data().text}));
                 notesPool = notesData.map(n => n.text);
-                const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-                document.getElementById('daily-relationship-note').innerText = `"${notesPool[dayOfYear % notesPool.length]}"`;
+                
+                // Başlangıçta RASTGELE bir not seç (Math.random)
+                const randomIndex = Math.floor(Math.random() * notesPool.length);
+                document.getElementById('daily-relationship-note').innerText = `"${notesPool[randomIndex]}"`;
                 
                 if(currentUser === 'İlker') {
                     document.getElementById('admin-full-note-list').innerHTML = notesData.map(n => 
