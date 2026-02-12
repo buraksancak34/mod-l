@@ -55,7 +55,7 @@
         .tab-btn.active { background-color: #e11d48; color: white; }
     </style>
 </head>
-<body class="text-slate-800 pb-24">
+<body class="text-slate-800 pb-24" onclick="document.getElementById('audio-element').play().catch(() => {})">
 
     <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity duration-300 z-[99999] text-sm font-bold pointer-events-none"></div>
 
@@ -190,7 +190,7 @@
         </div>
     </div>
 
-    <!-- MÜZİK PLAYER (HERKESE AÇIK - MUZIK.MP3) -->
+    <!-- MÜZİK PLAYER (HERKESE AÇIK - OTOMATİK OYNATMA TETİKLEYİCİLİ) -->
     <div id="music-player-bar" class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-lg border-t border-rose-100 p-3 flex justify-between items-center z-50 transform transition-transform duration-500 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
         <div class="flex items-center gap-3">
             <div id="music-icon" class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-500">🎵</div>
@@ -202,7 +202,7 @@
         <div class="flex gap-4 pr-4 items-center">
             <button onclick="togglePlay()" id="play-pause-btn" class="bg-rose-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">▶</button>
         </div>
-        <!-- ÖNEMLİ: Müzik dosyası '01. Aytekin Aytaş - Çalıkuşu Jenerık [koAnjI9hpIs].mp3' olarak aynı klasörde olmalı -->
+        <!-- Dosya ismi birebir aynı olmalı -->
         <audio id="audio-element" loop>
             <source src="01. Aytekin Aytaş - Çalıkuşu Jenerık [koAnjI9hpIs].mp3" type="audio/mpeg">
         </audio>
@@ -247,7 +247,7 @@
             <div id="content-settings" class="space-y-8 hidden">
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center">
                     <p class="text-[10px] font-bold text-slate-500">Müzik Ayarı</p>
-                    <p class="text-[10px] text-slate-400">Müzik, 'muzik.mp3' dosyası olarak sabitlendi.</p>
+                    <p class="text-[10px] text-slate-400">Müzik: '01. Aytekin Aytaş - Çalıkuşu Jenerık [koAnjI9hpIs].mp3'</p>
                 </div>
                 <div class="border-t border-slate-100 pt-4 space-y-3">
                     <p class="text-[9px] text-slate-400 text-center uppercase tracking-widest">Toplu İşlemler (Tek Seferlik)</p>
@@ -326,8 +326,13 @@
                 document.getElementById('login-modal').classList.add('hidden');
                 document.getElementById('password-input').value = '';
                 showToast(`Hoş geldin ${user} ❤️`);
+                
+                // Müzik Başlat
+                audio.play().catch(e => console.log("Otomatik oynatma engellendi, tıklama bekleniyor"));
+                
                 applyLoggedInState(user); 
-                renderAdminData(); // Admin verilerini hemen yükle
+                startPrivateListeners(); // KRİTİK EKLEME: VERİLERİ ŞİMDİ ÇEK!
+                renderAdminData(); 
             } else {
                 showToast('Şifre hatalı!');
             }
