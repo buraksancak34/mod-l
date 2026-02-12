@@ -326,14 +326,13 @@
                 document.getElementById('login-modal').classList.add('hidden');
                 document.getElementById('password-input').value = '';
                 showToast(`Hoş geldin ${user} ❤️`);
+                
+                // Müzik Başlat (Kullanıcı etkileşimi olduğu için çalışır)
+                initAudioContext();
+                
                 applyLoggedInState(user); 
                 startPrivateListeners(); // KRİTİK EKLEME: VERİLERİ ŞİMDİ ÇEK!
                 renderAdminData(); 
-                
-                // Müzik Başlat (Kullanıcı etkileşimi olduğu için çalışır)
-                audio.play().then(() => {
-                    document.getElementById('play-pause-btn').innerText = 'II';
-                }).catch(e => console.log("Otomatik oynatma engellendi, tıklama bekleniyor"));
             } else {
                 showToast('Şifre hatalı!');
             }
@@ -493,7 +492,9 @@
             if (audio.paused) {
                 audio.play().then(() => {
                     document.getElementById('play-pause-btn').innerText = 'II';
-                }).catch(() => {});
+                }).catch(() => {
+                    // Otomatik oynatma engellendiyse hata mesajı vermiyoruz, kullanıcı tıklayınca çalacak
+                });
             }
         }
 
@@ -501,6 +502,14 @@
             if(audio.paused) { audio.play(); document.getElementById('play-pause-btn').innerText='II'; }
             else { audio.pause(); document.getElementById('play-pause-btn').innerText='▶'; }
         }
+        
+        // Hata yakalama
+        audio.addEventListener('error', function(e) {
+            console.log("Müzik hatası:", e);
+            document.getElementById('current-song-title').innerText = "Dosya Bulunamadı!";
+            document.getElementById('current-song-title').classList.add('text-red-500');
+            showToast("Müzik dosyası (müzik.mp3) bulunamadı. Dosya adını kontrol et.");
+        });
 
         // --- LISTENERS ---
         // 1. PUBLIC DATA
